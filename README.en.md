@@ -77,16 +77,15 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 
 - [x] **Virtual Input Devices** - Cross-platform Input Abstraction Layer
 
-    A complete virtual input system integrated directly into the engine core, providing fluid touch controls for mobile and hybrid devices.
 
-    **Interface Nodes:**
+**Interface Nodes:**
 
 - `VirtualButton` - Configurable touch button with visual feedback and action mapping
 - `VirtualJoystick` - Analog control with customizable deadzones and sensitivity
 - `VirtualDPad` - Directional pad with support for 4 and 8 directions
 - `VirtualTouchPad` - Multi-touch gesture area for camera and viewport control
 
-    **Key Features:**
+**Key Features:**
 
 - **Input Device Tracking** - `LastInputType` API automatically detects and tracks the active input method (Touch, Keyboard/Mouse, Gamepad)
 - **Dynamic UI Adaptation** - Virtual controls automatically appear/hide based on the detected device
@@ -98,9 +97,9 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 
 - [x] **Save Server** - Persistence and Serialization Orchestrator
 
-     A robust, high-performance persistence system integrated into the engine core, allowing for secure and asynchronous saving and loading of complex states.
+A robust, high-performance persistence system integrated into the engine core, allowing for secure and asynchronous saving and loading of complex states.
 
-     **Key Features:**
+**Key Features:**
 
 - **Declarative Protocol (@persistent)** - Full automation via GDScript annotations and C++ flags. Supports strong typing and hierarchical organization via `@persistent_group`.
 - **Threaded Architecture** - I/O operations, ZSTD compression, and AES-256 encryption run on dedicated threads, ensuring fluid autosaves without stuttering.
@@ -109,115 +108,120 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 - **Incremental System (Amend Save)** - Inspired by Git, it tracks modified objects and applies surgical "patches" to the snapshot, reducing disk writes by up to 95%.
 - **Global ID Registry (persistence_id)** - Hierarchy abstraction that detaches data from NodePaths, preventing save breakage if nodes are renamed or moved.
 - **Data Evolution (Migrations)** - Versioning system that allows registering data transformations (`register_migration`) to maintain compatibility with legacy saves.
-- **Safety and Integrity** - Rotative backup system, SHA-256 checksum validation, and *Flush* mechanism on shutdown to prevent data corruption.
+- **Safety and Integrity** - Rotative backup system, SHA-256 checksum validation, and _Flush_ mechanism on shutdown to prevent data corruption.
+
+- [x] **Ability System (v0.1.0)** - Data-Oriented Gameplay Framework
+
+A mature, high-performance native framework (GDExtension/Module) designed for complex game mechanics and production-grade architectures.
+
+**Core Orchestration:**
+
+- `ASComponent` - The deterministic brain (physics-only) managing attributes and active Specs.
+- `ASContainer` - Class archetype template for rapid entity initialization (e.g., "Mage", "Warrior").
+- `ASDelivery` & `ASPackage` - Agnostic logic injectors that decouple gameplay from collision infrastructure.
+- `ASAttributeSet` & `ASAttribute` - Dynamic stats system with **Attribute Drivers** for reflexive value calculation.
+
+**Runtime Intelligence (Specs & Tags):**
+
+- **Sovereignty of Specs** - `ASAbilitySpec`, `ASEffectSpec`, and `ASCueSpec` handle runtime state, enabling shared resources across multiple actors.
+- **Global Tag Engine** - Hierarchical mapping (`AbilitySystem` Singleton) with built-in logical rules (`Required`, `Blocked`) and automated **Ability Triggers**.
+- **Native LimboAI Bridge** - Synchronized Behavior Tree nodes for authoritative AI control.
+
+**Multiplayer & Determinism:**
+
+- `ASStateCache` - Lightweight history buffer for local prediction.
+- `ASStateSnapshot` - Full-state capture for persistent Save/Load and Server-side Rollback.
+- **Safe API Patterns** - Enforced `try_activate`, `can_`, and `request_` (RPC) for unauthorized mutation prevention.
 
 ### In Development
 
-- [ ] **Ability System** - Data-Oriented Gameplay Framework
-
-    A high-performance native implementation designed to scale from simple mechanics to complex RPG combat systems.
-
-    **Core Systems:**
-  - `AbilitySystem` - Global singleton managing the Gameplay Tag registry and project settings.
-  - `AbilitySystemComponent` - The central processor attached to entities (Player, Enemies). Orchestrates abilities, effects, attributes, and cues.
-  - `AbilitySystemAbilityContainer` - Archetype resource defining the base configuration of an entity (Abilities, Initial Attributes, Innate Effects, Cues).
-  - `AbilitySystemAttributeSet` - Container that manages collections of AbilitySystemAttribute Resources with limit validation and runtime values.
-  - `AbilitySystemAttribute` - Defines a single attribute with `BaseValue` and `CurrentValue` (with buffs/debuffs).
-  - `AbilitySystemAbility` - Modular ability logic (Jump, Shoot, Magic) with **Costs & Cooldowns** and lifecycle `can_activate → activate → end`.
-  - `AbilitySystemEffect` - Attribute alteration rules (Damage, Healing, Buffs/Debuffs) with duration policies (Instant, Duration, Infinite).
-  - `AbilitySystemTask` - Asynchronous actions for complex abilities (e.g., waiting for input, moving to position, spawning projectiles).
-  - `AbilitySystemTag` - Hierarchical named tag (e.g., `state.buff.speed`) using optimized `StringName` storage with O(1) performance via `HashSet<StringName>`.
-  - `AbilitySystemCue` - Event activation and synchronization system (animations, sounds) triggered by effects or abilities. [CueParticles in planning]
-
-    **Runtime Systems (Specs):**
-
-    *Specs* are runtime instances that wrap a definition Resource with the execution context needed. They allow abilities, effects, and cues to access dynamic data (who attacked, what magnitude was calculated, remaining duration) without polluting the shared Resource.
-  - `AbilitySystemAbilitySpec` - Runtime instance of a granted `AbilitySystemAbility`. Stores level and active state.
-  - `AbilitySystemEffectSpec` - Runtime instance of an applied `AbilitySystemEffect`. Stores remaining duration, dynamic magnitudes, and references to source/target ASC.
-  - `AbilitySystemCueSpec` - Execution context for an `AbilitySystemCue`. Carries source/target ASC, the triggering `AbilitySystemEffectSpec`, and calculated magnitude.
-
-    **Auxiliary Systems:**
-  - `AbilitySystemMagnitudeCalculation` - Base class for custom magnitude calculations (MMC). Enables scaling damage by attributes (Strength, Intelligence) or curves.
-  - `AbilitySystemTagContainer` - Optimized tag container for runtime queries and modifications (add, remove, has, get_all).
-  - `AbilitySystemTargetData` - Target validation and filtering pipeline. Supports Line Trace, Sphere Overlap, Box and custom shapes.
-
-### In Planning
-
 - [ ] **Behavior Tree** - Modular and Reactive AI
 
-    A robust node-based AI implementation, focused on creating complex behaviors through simple and reusable visual logic.
+A robust node-based AI implementation, focused on creating complex behaviors through simple and reusable visual logic.
 
-    **Architecture:**
-  - `BTAgent`: The orchestrator attached to the NPC, managing memory (`Blackboard`) and tree ticking.
-  - **Composites** - Flow nodes (`Sequence`, `Selector`) that define decision making.
-  - **Decorators** - Conditional logic and modifiers (`Cooldown`, `Loop`, `Blackboard Check`) that wrap other nodes.
-  - **Leafs** - The actual work units (`MoveTo`, `Wait`, `ActivateAbility`).
+**Architecture:**
 
-    **Editor Integration (EditorPlugin):**
-    Behavior Trees use a **Dedicated Visual Editor** that operates in exclusive mode.
-  - **Visual Board** - Infinite canvas to organize complex AI hierarchies with visual clarity, supporting drag-and-drop of nodes.
-  - **Live Debugging** - Visual tracking of execution flow in real-time (nodes light up while active).
-  - **Sub-Trees** - Capability to create nodes that encapsulate entire trees, allowing massive reuse (e.g., a "Combat" tree used inside various different AIs).
+- `BTAgent`: The orchestrator attached to the NPC, managing memory (`Blackboard`) and tree ticking.
+- **Composites** - Flow nodes (`Sequence`, `Selector`) that define decision making.
+- **Decorators** - Conditional logic and modifiers (`Cooldown`, `Loop`, `Blackboard Check`) that wrap other nodes.
+- **Leafs** - The actual work units (`MoveTo`, `Wait`, `ActivateAbility`).
 
-    **Differentials:**
-  - **Native & GAS** - Designed to trigger `GameplayAbilities` directly via action nodes.
-  - **Performance** - Tree traversal in pure C++, eliminating script bottlenecks in dense AIs.
+**Editor Integration (EditorPlugin):**
+Behavior Trees use a **Dedicated Visual Editor** that operates in exclusive mode.
 
-    **Use Cases:**
+- **Visual Board** - Infinite canvas to organize complex AI hierarchies with visual clarity, supporting drag-and-drop of nodes.
+- **Live Debugging** - Visual tracking of execution flow in real-time (nodes light up while active).
+- **Sub-Trees** - Capability to create nodes that encapsulate entire trees, allowing massive reuse (e.g., a "Combat" tree used inside various different AIs).
+
+**Differentials:**
+
+- **Native & GAS** - Designed to trigger `GameplayAbilities` directly via action nodes.
+- **Performance** - Tree traversal in pure C++, eliminating script bottlenecks in dense AIs.
+
+**Use Cases:**
+
 - **RPG NPCs** - Complex combat, dialogue, and exploration behaviors.
 - **FPS Enemies** - Squad tactics, cover, and patrolling.
 - **Strategy AI** - Macro and micro-level decision making.
 
-- [ ] **Inventory System** - Item and Transaction Management
-  - **InventoryServer** - Authoritative singleton that validates all item movements, preventing inconsistent states or cheating.
-  - **Equipment Bridge (GAS)** - When equipping an item, the system automatically injects/removes *Gameplay Abilities* and *Effects* on the bearer's component, without manual scripts.
-  - **Smart UI Nodes** - Set of `Control` nodes (`InventoryGrid`, `EquipmentSlot`) that manage drag-and-drop and automatic synchronization with the server.
-  - **Loot Tables** - Procedural generation integrated with the GAS luck and tag system.
+### In Planning
 
-    **Architecture:**
+- [ ] **Inventory System** - Item and Transaction Management
+- **InventoryServer** - Authoritative singleton that validates all item movements, preventing inconsistent states or cheating.
+- **Equipment Bridge (GAS)** - When equipping an item, the system automatically injects/removes _Gameplay Abilities_ and _Effects_ on the bearer's component, without manual scripts.
+- **Smart UI Nodes** - Set of `Control` nodes (`InventoryGrid`, `EquipmentSlot`) that manage drag-and-drop and automatic synchronization with the server.
+- **Loot Tables** - Procedural generation integrated with the GAS luck and tag system.
+
+**Architecture:**
+
 - **Server-Side Authority** - All transactions validated on the server.
 - **Client Prediction** - Responsive interface with subsequent validation.
 - **Data-Driven** - Items defined as Resources with properties and behaviors.
 
-    **Technical Features:**
+**Technical Features:**
+
 - **Stack Management** - Automatic stack and quantity management.
 - **Slot Validation** - Equipment rule validation (class, level, etc.).
 - **Transaction Rollback** - Automatic reversal of invalid transactions.
 - **Network Sync** - Efficient synchronization of inventory changes.
 
-    **Use Cases:**
+**Use Cases:**
+
 - **RPGs** - Complex inventories with equipment and consumables.
 - **Survival** - Crafting and limited resource management.
 - **MMOs** - Virtual economy and cheating prevention.
 
 - [ ] **Camera System (vCam)** - Cinematographic Arbitration
-  - **Virtual Camera Resources** - Camera profiles defined as Resources, containing FOV, Follow Target, LookAt, and constraints.
-  - **Priority Arbiter** - The `vCamServer` evaluates in real-time which vCam has the highest priority to take control of the main viewport with configurable blends.
-  - **Procedural Shake** - Trauma system based on Perlin noise, where shake profiles are editable and cumulative Resources.
-  - **Viewport Integration** - Uses **Custom 3D Gizmos** to draw and visually adjust transition zones, tracking paths, and influence volumes directly in the scene.
+- **Virtual Camera Resources** - Camera profiles defined as Resources, containing FOV, Follow Target, LookAt, and constraints.
+- **Priority Arbiter** - The `vCamServer` evaluates in real-time which vCam has the highest priority to take control of the main viewport with configurable blends.
+- **Procedural Shake** - Trauma system based on Perlin noise, where shake profiles are editable and cumulative Resources.
+- **Viewport Integration** - Uses **Custom 3D Gizmos** to draw and visually adjust transition zones, tracking paths, and influence volumes directly in the scene.
 
-    **Architecture:**
+**Architecture:**
+
 - **vCamServer** - Central singleton that manages all virtual cameras in the Zyris system.
 - **Priority System** - Dynamic priority system with smooth blends.
 - **Resource-Based** - Configurations saved as Resources for reusability.
 - **Non-Intrusive** - Interacts with Godot's existing camera system without modifying it.
 
-    **Technical Features:**
+**Technical Features:**
+
 - **Dynamic Blending** - Smooth transitions between cameras with customizable curves.
 - **Dead Zones** - Dead zones to prevent excessive movement.
 - **Aim Tracking** - Automatic target following with prediction.
 - **Cinematic Sequences** - Support for predefined cinematic sequences.
 
-    **Use Cases:**
+**Use Cases:**
+
 - **Action Games** - Dynamic cameras that respond to gameplay.
 - **Cinematics** - Complex and dramatic camera sequences.
 - **RPGs** - Over-the-shoulder cameras with contextual behavior.
 
 - [ ] **Multiplayer Update** - Next-Gen Replication and Prediction
 
-     A systemic update that injects performance-driven prediction and replication logic into all core engine modules.
+A systemic update that injects performance-driven prediction and replication logic into all core engine modules.
 
-     **Key Features:**
+**Key Features:**
 
 - **Layered Replication (Network LOD)** - Intelligent bandwidth management based on priority and proximity.
 - **Prediction and Reconciliation** - Native framework to mitigate latency with authoritative rollback support.
@@ -225,18 +229,21 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 - **Multiplayer GAS** - Ability System integration with authoritative networking and attribute prediction.
 - **Network Debugger** - Visual monitoring of bandwidth and latency per object directly in the Editor.
 
-     **API and Configuration:**
+**API and Configuration:**
+
 - **Network Settings** - Server Tick Rate, Client Prediction, Relevance Distance, Bandwidth Limit via Project Settings.
 - **Replication Priorities** - CRITICAL, HIGH, LOW, NONE for granular bandwidth control.
 - **Movement Prediction** - Input buffers, state buffers, and smooth reconciliation.
 - **Authoritative Validation** - Server-side action verification with result broadcasting.
 
-     **Use Cases:**
+**Use Cases:**
+
 - **FPS Multiplayer** - Movement prediction, hit registration, weapon sync.
 - **RPG Multiplayer** - Ability system, inventory sync, persistent world state.
 - **Strategy Games** - AI authority, unit commands, authoritative resource management.
 
-     **Performance and Optimization:**
+**Performance and Optimization:**
+
 - **Latency Compensation** - Automatic latency compensation.
 - **Packet Loss Recovery** - Recovery from lost packets.
 - **Bandwidth Optimization** - Efficient bandwidth usage with delta compression and native bit-packing.
@@ -244,28 +251,31 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 
 - [ ] **Dialogue System** - Interactive Narrative Engine
 
-    A comprehensive dialogue system inspired by Dialogic 2, designed for creating complex branching conversations, visual novels, and interactive storytelling experiences.
+A comprehensive dialogue system inspired by Dialogic 2, designed for creating complex branching conversations, visual novels, and interactive storytelling experiences.
 
-    **Core Systems:**
-  - `DialogueServer` - Global singleton managing dialogue state, history, and active conversations
-  - `DialogueComponent` - Scene node attached to characters/NPCs for dialogue interactions
-  - `DialogueResource` - Complete dialogue tree with branching paths, conditions, and character definitions
-  - `DialogueLine` - Individual dialogue entries with speaker, text, conditions, and actions
-  - `DialogueChoice` - Player-selectable options with requirements and consequences
-  - `DialogueCondition` - Conditional logic system using tags, attributes, and game state
-  - `DialogueAction` - Triggerable actions (give items, start quests, change states)
-  - `DialogueVariable` - Global and local variable system for dynamic dialogue content
+**Core Systems:**
 
-    **Advanced Features:**
-  - **Visual Editor** - Node-based dialogue tree editor with real-time preview
-  - **Character System** - Character portraits, expressions, and voice integration
-  - **Localization Support** - Multi-language dialogue with automatic text resolution
-  - **Save Integration** - Native integration with SaveServer for persistent dialogue state
-  - **Signal System** - Reactive dialogue events for UI updates and game logic
-  - **Typing Effects** - Configurable text appearance with sound effects
-  - **Timeline Integration** - Support for cutscenes and animations during dialogue
+- `DialogueServer` - Global singleton managing dialogue state, history, and active conversations
+- `DialogueComponent` - Scene node attached to characters/NPCs for dialogue interactions
+- `DialogueResource` - Complete dialogue tree with branching paths, conditions, and character definitions
+- `DialogueLine` - Individual dialogue entries with speaker, text, conditions, and actions
+- `DialogueChoice` - Player-selectable options with requirements and consequences
+- `DialogueCondition` - Conditional logic system using tags, attributes, and game state
+- `DialogueAction` - Triggerable actions (give items, start quests, change states)
+- `DialogueVariable` - Global and local variable system for dynamic dialogue content
 
-    **Use Cases:**
+**Advanced Features:**
+
+- **Visual Editor** - Node-based dialogue tree editor with real-time preview
+- **Character System** - Character portraits, expressions, and voice integration
+- **Localization Support** - Multi-language dialogue with automatic text resolution
+- **Save Integration** - Native integration with SaveServer for persistent dialogue state
+- **Signal System** - Reactive dialogue events for UI updates and game logic
+- **Typing Effects** - Configurable text appearance with sound effects
+- **Timeline Integration** - Support for cutscenes and animations during dialogue
+
+**Use Cases:**
+
 - **RPGs** - Complex NPC conversations with branching storylines
 - **Visual Novels** - Complete narrative experiences with character development
 - **Adventure Games** - Story-driven puzzles and interactive storytelling
@@ -273,35 +283,39 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 
 - [ ] **Quest System** - Mission and Objective Management
 
-    A robust quest management system built around QuestTags, providing comprehensive mission tracking, objective management, and reward distribution.
+A robust quest management system built around QuestTags, providing comprehensive mission tracking, objective management, and reward distribution.
 
-    **Core Systems:**
-  - `QuestServer` - Authoritative singleton managing all active quests and progress
-  - `QuestComponent` - Scene node for quest givers and quest-related entities
-  - `QuestResource` - Complete quest definition with objectives, requirements, and rewards
-  - `QuestTag` - Hierarchical tagging system for quest categorization and filtering
-  - `QuestObjective` - Individual tasks with completion criteria and progress tracking
-  - `QuestReward` - Configurable rewards (items, experience, abilities, currency)
-  - `QuestPrerequisite` - Requirement system using tags, level, items, or completed quests
-  - `QuestTracker` - UI component for displaying active quests and objectives
+**Core Systems:**
 
-    **Advanced Features:**
-  - **Dynamic Quest Generation** - Procedural quest creation using templates and variables
-  - **Quest Chains** - Multi-part quests with branching progression paths
-  - **Time-Limited Quests** - Quests with deadlines and timed objectives
-  - **Shared Quests** - Multiplayer quest synchronization and progress sharing
-  - **Quest Journal** - Complete quest history with detailed progress tracking
-  - **Notification System** - Quest updates, completions, and new quest alerts
-  - **Integration Bridge** - Native connectivity with Ability System, Inventory, and Dialogue
+- `QuestServer` - Authoritative singleton managing all active quests and progress
+- `QuestComponent` - Scene node for quest givers and quest-related entities
+- `QuestResource` - Complete quest definition with objectives, requirements, and rewards
+- `QuestTag` - Hierarchical tagging system for quest categorization and filtering
+- `QuestObjective` - Individual tasks with completion criteria and progress tracking
+- `QuestReward` - Configurable rewards (items, experience, abilities, currency)
+- `QuestPrerequisite` - Requirement system using tags, level, items, or completed quests
+- `QuestTracker` - UI component for displaying active quests and objectives
 
-    **Technical Features:**
+**Advanced Features:**
+
+- **Dynamic Quest Generation** - Procedural quest creation using templates and variables
+- **Quest Chains** - Multi-part quests with branching progression paths
+- **Time-Limited Quests** - Quests with deadlines and timed objectives
+- **Shared Quests** - Multiplayer quest synchronization and progress sharing
+- **Quest Journal** - Complete quest history with detailed progress tracking
+- **Notification System** - Quest updates, completions, and new quest alerts
+- **Integration Bridge** - Native connectivity with Ability System, Inventory, and Dialogue
+
+**Technical Features:**
+
 - **QuestTag System** - Hierarchical tagging (e.g., `quest.main.story.chapter1`) for organization
 - **Progress Persistence** - Automatic save/load integration with SaveServer
 - **Condition System** - Complex prerequisite checking using game state and tags
 - **Event-Driven Updates** - Reactive quest progress based on game events
 - **Performance Optimized** - Efficient quest checking and progress tracking
 
-    **Use Cases:**
+**Use Cases:**
+
 - **MMOs** - Large-scale quest systems with thousands of concurrent quests
 - **RPGs** - Story-driven quest chains with character development
 - **Action Games** - Achievement systems and challenge tracking
@@ -309,28 +323,31 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 
 - [ ] **World Management System** - World and State Orchestration
 
-    A comprehensive world orchestration system designed to handle large-scale game worlds through deterministic state management and intelligent streaming zones.
+A comprehensive world orchestration system designed to handle large-scale game worlds through deterministic state management and intelligent streaming zones.
 
-    **Core Systems:**
-  - `WorldManager` - Global singleton managing application lifecycle through deterministic states (`BOOT`, `MENU`, `LOADING`, `GAMEPLAY`, `TRANSITION`)
-  - `WorldRoot` - Super Node architecture allowing multiple isolated worlds or "universes" to coexist, facilitating map transitions without core logic interruption
-  - `StreamingZone` - Spatial volume system managing asynchronous loading of world chunks based on player position and priority
-  - `SceneStreaming` - Intelligent scene streaming with background loading/unloading for seamless world transitions
-  - `WorldInstance` - Dynamic instancing system for dungeons, houses, and separate world areas
-  - `LevelOfDetail` - Automatic LOD management for optimal performance at scale
-  - `WorldPortal` - Optimized portal system for seamless transitions between world areas
+**Core Systems:**
 
-    **Advanced Features:**
-  - **Deterministic State Machine** - GSM ensures predictable application lifecycle and state transitions
-  - **Multi-Universe Support** - WorldRoot enables parallel world instances with isolated logic
-  - **Background Streaming** - Asynchronous loading/unloading of world sections without frame drops
-  - **Memory Management** - Intelligent memory pooling and garbage collection for world data
-  - **Network Optimization** - Server-side world streaming with client prediction for multiplayer
-  - **Persistence Integration** - Native SaveServer integration for world state persistence
-  - **Editor Tools** - Visual world editing tools with streaming preview and debugging
-  - **Performance Profiling** - Built-in profiling tools for streaming performance optimization
+- `WorldManager` - Global singleton managing application lifecycle through deterministic states (`BOOT`, `MENU`, `LOADING`, `GAMEPLAY`, `TRANSITION`)
+- `WorldRoot` - Super Node architecture allowing multiple isolated worlds or "universes" to coexist, facilitating map transitions without core logic interruption
+- `StreamingZone` - Spatial volume system managing asynchronous loading of world chunks based on player position and priority
+- `SceneStreaming` - Intelligent scene streaming with background loading/unloading for seamless world transitions
+- `WorldInstance` - Dynamic instancing system for dungeons, houses, and separate world areas
+- `LevelOfDetail` - Automatic LOD management for optimal performance at scale
+- `WorldPortal` - Optimized portal system for seamless transitions between world areas
 
-    **Technical Features:**
+**Advanced Features:**
+
+- **Deterministic State Machine** - GSM ensures predictable application lifecycle and state transitions
+- **Multi-Universe Support** - WorldRoot enables parallel world instances with isolated logic
+- **Background Streaming** - Asynchronous loading/unloading of world sections without frame drops
+- **Memory Management** - Intelligent memory pooling and garbage collection for world data
+- **Network Optimization** - Server-side world streaming with client prediction for multiplayer
+- **Persistence Integration** - Native SaveServer integration for world state persistence
+- **Editor Tools** - Visual world editing tools with streaming preview and debugging
+- **Performance Profiling** - Built-in profiling tools for streaming performance optimization
+
+**Technical Features:**
+
 - **Spatial Hash Grid** - Efficient spatial queries for world objects and entities
 - **Chunk-Based Streaming** - World divided into manageable chunks with smart loading
 - **Distance-Based Culling** - Automatic culling of distant objects for performance
@@ -338,16 +355,17 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 - **Memory Footprint Optimization** - Minimal memory usage through intelligent caching
 - **State Persistence** - World state automatically preserved during transitions
 
-    **Use Cases:**
+**Use Cases:**
+
 - **Open-World RPGs** - Massive seamless worlds with dungeons and cities
 - **MMOs** - Large persistent worlds with thousands of players
 - **Action Games** - Large levels with streaming for reduced loading times
 
 - [ ] **Cloud Providers** - Cloud Services and Platform Abstraction
 
-     A unified module for integration with external services (Steam, EOS, Mobile), consolidating remote saving, accounts, and discovery sessions.
+A unified module for integration with external services (Steam, EOS, Mobile), consolidating remote saving, accounts, and discovery sessions.
 
-     **Key Features:**
+**Key Features:**
 
 - **Provider Abstraction (CloudProvider)** - Polymorphic interface that unifies Steam, Epic Online Services, and PlayFab under a single API.
 - **Save Synchronization (Cloud Save)** - Asynchronous upload/download of snapshots fully integrated into the `SaveServer`.
@@ -355,75 +373,81 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 - **Single Sign-On (SSO)** - Transparent authentication and persistent profile management.
 - **SDK Management (EditorSDKManager)** - Dedicated Editor interface for configuration and validation of third-party SDKs (Steamworks, GDK, etc).
 
-     **Provider Architecture:**
+**Provider Architecture:**
+
 - **SteamProvider** - Complete integration with Steam Cloud, Auth, and Networking.
 - **EOSProvider** - Support for Epic Online Services (Save, Friends, Sessions).
 - **CustomHTTPProvider** - Generic backend via REST for proprietary infrastructure.
 - **GooglePlayProvider** - Integration with Google Play Games Services.
 
-     **Technical Features:**
+**Technical Features:**
+
 - **Conflict Resolution** - Based on timestamps and SHA-256 checksums.
 - **Incremental Synchronization** - Only changes are transferred.
 - **Relay Networking** - Packet transport without Port Forwarding.
 - **Lobby Management** - Creation, discovery, and customizable metadata.
 
-     **Use Cases:**
+**Use Cases:**
+
 - **Multiplayer Games** - Matchmaking, cross-platform, cloud persistence.
 - **Single-Player Games with Cloud** - Universal progress, automatic backup, achievements.
 - **Enterprise Applications** - Custom backend, enterprise authentication, analytics.
 
 - [ ] **Audio System Improvements**
 
-    Zyris expands and overhauls its native audio system, acting directly on existing components (`AudioServer`, `AudioStream`, `AudioStreamPlayer`, `AudioBus`, `AudioEffect`), without introducing parallel servers or external naming conventions.
+Zyris expands and overhauls its native audio system, acting directly on existing components (`AudioServer`, `AudioStream`, `AudioStreamPlayer`, `AudioBus`, `AudioEffect`), without introducing parallel servers or external naming conventions.
 
-    **Scope of Improvements:**
-  - **Overhaul of AudioStreamPlayers and Listeners**
-    - Players now support high-level sound logic.
-    - Direct integration with events, states, and gameplay parameters.
-    - More expressive behavior without abandoning Godot's model.
+**Scope of Improvements:**
 
-  - **Expansion of existing Audio Resources**
-    - `AudioStream` with metadata and dynamic parameters.
-    - Support for variations, layers, and contextual resolution.
+- **Overhaul of AudioStreamPlayers and Listeners**
+- Players now support high-level sound logic.
+- Direct integration with events, states, and gameplay parameters.
+- More expressive behavior without abandoning Godot's model.
 
-  - **Introduction of new Audio Resources**
-    - New types strictly follow Godot's standard inheritance and existing naming.
-    - Direct integration with the AudioServer.
+- **Expansion of existing Audio Resources**
+- `AudioStream` with metadata and dynamic parameters.
+- Support for variations, layers, and contextual resolution.
 
-  - **Advanced Mixing and DSP**
-    - DSP per stream, bus, or global (Equalization, filters, compression, and temporal effects).
-    - Dynamic control via code or events.
+- **Introduction of new Audio Resources**
+- New types strictly follow Godot's standard inheritance and existing naming.
+- Direct integration with the AudioServer.
 
-  - **Sound Events**
-    - Sounds are no longer triggered just by files; execution based on intent and context.
-    - Dynamic audio resolution at runtime.
+- **Advanced Mixing and DSP**
+- DSP per stream, bus, or global (Equalization, filters, compression, and temporal effects).
+- Dynamic control via code or events.
 
-  - **Gameplay Integration**
-    - Direct integration with GAS, Behavior Trees, LSS, and Save Server.
-    - Game states influence mixing, execution, and sound transitions.
+- **Sound Events**
+- Sounds are no longer triggered just by files; execution based on intent and context.
+- Dynamic audio resolution at runtime.
 
-    These improvements elevate Zyris audio to a modern, reactive, and scalable level, maintaining conceptual compatibility with the base engine.
+- **Gameplay Integration**
+- Direct integration with GAS, Behavior Trees, LSS, and Save Server.
+- Game states influence mixing, execution, and sound transitions.
+
+These improvements elevate Zyris audio to a modern, reactive, and scalable level, maintaining conceptual compatibility with the base engine.
 
 - [ ] **AOT Export System** - SDK-based Architecture
 
-    The AOT Export System is one of the central pillars of the Zyris vision, designed to deliver high-performance native execution without altering Godot's development flow.
+The AOT Export System is one of the central pillars of the Zyris vision, designed to deliver high-performance native execution without altering Godot's development flow.
 
-    AOT does not replace the VM during development. It acts exclusively at export time, removing the VM only from the final built game and generating native binaries targeted at the destination hardware.
+AOT does not replace the VM during development. It acts exclusively at export time, removing the VM only from the final built game and generating native binaries targeted at the destination hardware.
 
-    **Key Benefits:**
-  - **Native Performance** - By removing the Virtual Machine (VM) from the final executable, the game runs directly on hardware, eliminating script interpretation overhead.
-  - **Security (Anti-Hack)** - Compilation to native machine code makes reverse engineering exponentially harder compared to script or bytecode decompilation, protecting intellectual property.
-  - **Export-Only** - The development flow remains agile with Hot-Reloading, while AOT acts only in the final build pipeline.
+**Key Benefits:**
 
-    To ensure sustainability, scalability, and ease of contribution, AOT is conceived as an external SDK, integrated into the engine's export pipeline.
+- **Native Performance** - By removing the Virtual Machine (VM) from the final executable, the game runs directly on hardware, eliminating script interpretation overhead.
+- **Security (Anti-Hack)** - Compilation to native machine code makes reverse engineering exponentially harder compared to script or bytecode decompilation, protecting intellectual property.
+- **Export-Only** - The development flow remains agile with Hot-Reloading, while AOT acts only in the final build pipeline.
 
-    **Model Guidelines:**
-  - Execution only on export (does not participate in editor or debug)
-  - Editor remains lightweight and decoupled from compiler cost
-  - Contributions facilitated via dedicated repository
-  - Architecture aligned with professional SDK models (Android SDK, NDK)
+To ensure sustainability, scalability, and ease of contribution, AOT is conceived as an external SDK, integrated into the engine's export pipeline.
 
-    The SDK uses Python as an orchestration layer, responsible for coordinating complex compilation pipelines, IR transformation, and integration with native toolchains.
+**Model Guidelines:**
+
+- Execution only on export (does not participate in editor or debug)
+- Editor remains lightweight and decoupled from compiler cost
+- Contributions facilitated via dedicated repository
+- Architecture aligned with professional SDK models (Android SDK, NDK)
+
+The SDK uses Python as an orchestration layer, responsible for coordinating complex compilation pipelines, IR transformation, and integration with native toolchains.
 
 ## License
 

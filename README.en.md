@@ -77,6 +77,7 @@ Zyris is implementing a comprehensive set of systems. Below is our development r
 
 - [x] **Virtual Input Devices** - Cross-platform Input Abstraction Layer
 
+A complete virtual input system integrated directly into the engine core, providing fluid touch controls for mobile and hybrid devices.
 
 **Interface Nodes:**
 

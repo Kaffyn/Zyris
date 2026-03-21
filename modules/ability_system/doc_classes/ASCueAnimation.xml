@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASCueAnimation" inherits="ASCue" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Cue specialized for playing animations.
+	</brief_description>
+	<description>
+		[ASCueAnimation] is a specialized cue that automatically plays animations when triggered. It works with [AnimationPlayer], [AnimatedSprite2D], and [AnimatedSprite3D] nodes provided to the [ASComponent].
+
+		Create a .tres resource of this type, set the [member animation_name] property, and add it to your [ASAbility]'s [member ASAbility.cues] list. When the ability is activated, the animation will play on the target node.
+
+		[b]Example:[/b]
+		[codeblocks]
+		[gdscript]
+		# Create hit_animation.tres (ASCueAnimation)
+		# cue_tag: "hit_animation"
+		# animation_name: "hit"
+		# event_type: OnExecute
+		[/gdscript]
+		[csharp]
+		// Create hit_animation.tres (ASCueAnimation)
+		// cue_tag: "hit_animation"
+		// animation_name: "hit"
+		// event_type: OnExecute
+		[/csharp]
+		[/codeblocks]
+	</description>
+	<tutorials>
+	</tutorials>
+	<members>
+		<member name="animation_name" type="String" setter="set_animation_name" getter="get_animation_name" default="&quot;&quot;">
+			Name of the animation to play. The cue will look for a node with the alias [member ASCue.node_name] in the component's registry. If no name is specified, the component will try its default animation nodes.
+		</member>
+	</members>
+</class>

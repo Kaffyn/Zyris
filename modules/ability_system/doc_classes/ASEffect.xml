@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEffect" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Resource defining modifications to attributes and tags.
+	</brief_description>
+	<description>
+		[ASEffect] defines a package of attribute modifiers and tags. Can be instant, have a duration, or be infinite.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_modifier">
+			<return type="void" />
+			<param index="0" name="attribute" type="StringName" />
+			<param index="1" name="operation" type="int" enum="ASEffect.ModifierOp" />
+			<param index="2" name="magnitude" type="float" />
+			<param index="3" name="use_custom_magnitude" type="bool" default="false" />
+			<description>
+				Adds an attribute modifier.
+			</description>
+		</method>
+		<method name="add_requirement">
+			<return type="void" />
+			<param index="0" name="attribute" type="StringName" />
+			<param index="1" name="amount" type="float" />
+			<description>
+				Adds an attribute requirement.
+			</description>
+		</method>
+		<method name="get_modifier_attribute" qualifiers="const">
+			<return type="StringName" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the name of the attribute targeted by a modifier at a given index.
+			</description>
+		</method>
+		<method name="get_modifier_count" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the number of modifiers defined in this effect.
+			</description>
+		</method>
+		<method name="get_modifier_magnitude" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the base magnitude of a specific modifier by its index.
+			</description>
+		</method>
+		<method name="get_modifier_operation" qualifiers="const">
+			<return type="int" enum="ASEffect.ModifierOp" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the mathematical operation of a specific modifier.
+			</description>
+		</method>
+		<method name="get_requirement_amount" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the amount for the specified requirement.
+			</description>
+		</method>
+		<method name="get_requirement_attribute" qualifiers="const">
+			<return type="StringName" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the attribute for the specified requirement.
+			</description>
+		</method>
+		<method name="is_modifier_custom" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns true if the specified modifier uses custom calculation logic.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="activation_blocked_all_tags" type="StringName[]" setter="set_activation_blocked_all_tags" getter="get_activation_blocked_all_tags" default="[]">
+			Effect cannot be applied if the target has [b]all[/b] of these tags simultaneously (AND logic).
+		</member>
+		<member name="activation_blocked_any_tags" type="StringName[]" setter="set_activation_blocked_any_tags" getter="get_activation_blocked_any_tags" default="[]">
+			Effect cannot be applied if the target has [b]any[/b] of these tags (OR logic).
+		</member>
+		<member name="activation_required_all_tags" type="StringName[]" setter="set_activation_required_all_tags" getter="get_activation_required_all_tags" default="[]">
+			Effect requires the target to have [b]all[/b] of these tags to be applied (AND logic).
+		</member>
+		<member name="activation_required_any_tags" type="StringName[]" setter="set_activation_required_any_tags" getter="get_activation_required_any_tags" default="[]">
+			Effect requires the target to have [b]at least one[/b] of these tags to be applied (OR logic).
+		</member>
+		<member name="blocked_tags" type="StringName[]" setter="set_blocked_tags" getter="get_blocked_tags" default="[]">
+			Tags that dictate whether this effect is blocked from applying.
+		</member>
+		<member name="cues" type="ASCue[]" setter="set_cues" getter="get_cues" default="[]">
+			Visual and Audio Cues emitted by this effect.
+		</member>
+		<member name="duration_magnitude" type="float" setter="set_duration_magnitude" getter="get_duration_magnitude" default="0.0">
+			Base duration value.
+		</member>
+		<member name="duration_policy" type="int" setter="set_duration_policy" getter="get_duration_policy" enum="ASEffect.DurationPolicy" default="0">
+			INSTANT (0), DURATION (1), INFINITE (2).
+		</member>
+		<member name="effect_name" type="String" setter="set_effect_name" getter="get_effect_name" default="&quot;&quot;">
+			Unique name for the effect.
+		</member>
+		<member name="effect_tag" type="StringName" setter="set_effect_tag" getter="get_effect_tag" default="&amp;&quot;&quot;">
+			Tag identifying this effect.
+		</member>
+		<member name="execute_periodic_tick_on_application" type="bool" setter="set_execute_periodic_tick_on_application" getter="get_execute_periodic_tick_on_application" default="false">
+			If true, the periodic effect triggers immediately upon application instead of waiting for the first period to elapse.
+		</member>
+		<member name="granted_tags" type="StringName[]" setter="set_granted_tags" getter="get_granted_tags" default="[]">
+			Tags granted while effect is active.
+		</member>
+		<member name="modifiers" type="int" setter="set_modifiers_count" getter="get_modifiers_count" default="0">
+			The number of attribute modifiers in this effect package.
+		</member>
+		<member name="period" type="float" setter="set_period" getter="get_period" default="0.0">
+			The time in seconds between periodic applications. Only used if duration_policy is DURATION or INFINITE.
+		</member>
+		<member name="removed_tags" type="StringName[]" setter="set_removed_tags" getter="get_removed_tags" default="[]">
+			Tags corresponding to effects that should be removed when this effect applies.
+		</member>
+		<member name="requirements" type="int" setter="set_requirements_count" getter="get_requirements_count" default="0">
+			The number of attribute requirements needed to apply this effect.
+		</member>
+		<member name="stacking_policy" type="int" setter="set_stacking_policy" getter="get_stacking_policy" enum="ASEffect.StackingPolicy" default="0">
+			Policy determining how new applications stack with existing instances of the same effect tag.
+		</member>
+		<member name="target_type" type="int" setter="set_target_type" getter="get_target_type" enum="ASEffect.TargetType" default="0">
+			Defines whether the effect applies to the owner (Self) or should be passed to other targets (Others).
+		</member>
+		<member name="use_custom_duration" type="bool" setter="set_use_custom_duration" getter="get_use_custom_duration" default="false">
+			If true, duration is calculated via ASC callback (index -1).
+		</member>
+	</members>
+	<constants>
+		<constant name="POLICY_INSTANT" value="0" enum="DurationPolicy">
+			Effect is applied once and removed immediately.
+		</constant>
+		<constant name="POLICY_DURATION" value="1" enum="DurationPolicy">
+			Effect lasts for a specified duration.
+		</constant>
+		<constant name="POLICY_INFINITE" value="2" enum="DurationPolicy">
+			Effect lasts indefinitely until removed.
+		</constant>
+		<constant name="STACK_NEW_INSTANCE" value="0" enum="StackingPolicy">
+			Each application is independent.
+		</constant>
+		<constant name="STACK_OVERRIDE" value="1" enum="StackingPolicy">
+			New application replaces the old (resets timer).
+		</constant>
+		<constant name="STACK_INTENSITY" value="2" enum="StackingPolicy">
+			Increases magnitude (adds to stack count).
+		</constant>
+		<constant name="STACK_DURATION" value="3" enum="StackingPolicy">
+			Extends the remaining duration.
+		</constant>
+		<constant name="TARGET_SELF" value="0" enum="TargetType">
+			Effect is applied to the component that originated it.
+		</constant>
+		<constant name="TARGET_OTHERS" value="1" enum="TargetType">
+			Effect is intended to be applied to other components (e.g., via projectiles or area attacks).
+		</constant>
+		<constant name="OP_ADD" value="0" enum="ModifierOp">
+			Adds the magnitude to the attribute.
+		</constant>
+		<constant name="OP_MULTIPLY" value="1" enum="ModifierOp">
+			Multiplies the attribute by the magnitude.
+		</constant>
+		<constant name="OP_DIVIDE" value="2" enum="ModifierOp">
+			Divides the attribute by the magnitude.
+		</constant>
+		<constant name="OP_OVERRIDE" value="3" enum="ModifierOp">
+			Overrides the attribute with the magnitude.
+		</constant>
+	</constants>
+</class>

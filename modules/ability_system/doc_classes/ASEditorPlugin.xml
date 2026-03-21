@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEditorPlugin" inherits="EditorPlugin" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Main editor plugin for the Ability System.
+	</brief_description>
+	<description>
+		[ASEditorPlugin] is the main entry point for the Ability System editor integration. It registers custom types, icons, and handles the initialization of inspector extensions and the tags panel.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

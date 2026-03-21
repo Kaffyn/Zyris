@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASStateSnapshot" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Resource that captures and restores the state of an ASComponent.
+	</brief_description>
+	<description>
+		ASStateSnapshot is a high-level data container used for networking (replication, rollback) and gameplay persistence (save systems). It encapsulates all attribute base values, active tags, and the state of active effects (remaining time, stacks) of an [ASComponent] at an exact point in time (tick).
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="apply_to_component" qualifiers="const">
+			<return type="void" />
+			<param index="0" name="component" type="ASComponent" />
+			<description>
+				Restores the state stored in this snapshot to the provided [ASComponent].
+			</description>
+		</method>
+		<method name="capture_from_component">
+			<return type="void" />
+			<param index="0" name="component" type="ASComponent" />
+			<description>
+				Captures the current state (attributes and tags) from the provided [ASComponent] into this resource.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="active_effects" type="Array" setter="set_active_effects" getter="get_active_effects" default="[]">
+		</member>
+		<member name="attributes" type="Dictionary" setter="set_attributes" getter="get_attributes" default="{}">
+			Dictionary mapping attribute names (StringName) to their base values (float).
+		</member>
+		<member name="tags" type="PackedStringArray" setter="set_tags" getter="get_tags" default="PackedStringArray()">
+			List of all active tags at the time of capture.
+		</member>
+		<member name="tick" type="int" setter="set_tick" getter="get_tick" default="0">
+			The simulation tick number when this snapshot was captured.
+		</member>
+	</members>
+</class>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASDelivery" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Reactive effect delivery node for projectiles and payloads.
+	</brief_description>
+	<description>
+		[ASDelivery] is a specialized node designed to carry and deliver [ASPackage]s to [ASComponent] targets.
+		Unlike [ASComponent], which acts as a full ability system hub for an actor, [ASDelivery] is a lightweight utility that can be attached to any node (like a projectile's Area2D) to inject effects upon impact.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="activate">
+			<return type="void" />
+			<param index="0" name="duration" type="float" default="-1.0" />
+			<description>
+				Activates the delivery. If [param duration] is positive, it overrides [member life_span].
+			</description>
+		</method>
+		<method name="can_deliver_to" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="target" type="Node" />
+			<description>
+				Checks if the delivery can reach the specified target (checks groups and validity).
+			</description>
+		</method>
+		<method name="deactivate">
+			<return type="void" />
+			<description>
+				Deactivates the delivery.
+			</description>
+		</method>
+		<method name="deliver">
+			<return type="void" />
+			<param index="0" name="target" type="Node" />
+			<description>
+				Delivers the [member package] to the target [ASComponent] (or its parents/children if the node itself isn't one).
+			</description>
+		</method>
+		<method name="is_delivery_valid" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if the delivery is active and hasn't expired.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="auto_connect" type="bool" setter="set_auto_connect" getter="get_auto_connect" default="false">
+			If true, attempts to connect automatically to [Area2D] or [Area3D] signals in the parent node.
+		</member>
+		<member name="is_active" type="bool" setter="set_active" getter="get_active" default="false">
+			Current activation state.
+		</member>
+		<member name="level" type="float" setter="set_level" getter="get_level" default="1.0">
+			The magnitude or strength level of the delivery. This gets injected into all effects spawned by the delivery.
+		</member>
+		<member name="life_span" type="float" setter="set_life_span" getter="get_life_span" default="0.0">
+			Maximum duration the delivery stays active (0 = infinite).
+		</member>
+		<member name="one_shot" type="bool" setter="set_one_shot" getter="get_one_shot" default="false">
+			If true, the delivery deactivates automatically after the first successful delivery.
+		</member>
+		<member name="package" type="ASPackage" setter="set_package" getter="get_package">
+			The [ASPackage] payload containing effects and cues.
+		</member>
+		<member name="source_component" type="ASComponent" setter="set_source_component" getter="get_source_component">
+			The [ASComponent] that initiated this delivery (e.g., the original attacker).
+		</member>
+		<member name="target_groups" type="StringName[]" setter="set_target_groups" getter="get_target_groups" default="[]">
+			List of groups that targets must belong to for delivery to occur.
+		</member>
+	</members>
+	<signals>
+		<signal name="delivered">
+			<param index="0" name="target" type="Object" />
+			<description>
+				Emitted when a package is successfully delivered to a target.
+			</description>
+		</signal>
+		<signal name="expired">
+			<description>
+				Emitted when the life_span timer reaches zero.
+			</description>
+		</signal>
+	</signals>
+</class>

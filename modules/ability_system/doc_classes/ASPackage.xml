@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASPackage" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		A reusable container for effects and cues that can be delivered.
+	</brief_description>
+	<description>
+		[ASPackage] is a data container that bundles multiple [ASEffect]s and [ASCue]s together. This is primarily used by [ASDelivery] to apply a complex payload (like a fireball's damage and visual effects) to a target [ASComponent].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_cue">
+			<return type="void" />
+			<param index="0" name="cue" type="ASCue" />
+			<description>
+				Adds a direct [ASCue] resource to the package.
+			</description>
+		</method>
+		<method name="add_cue_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Adds a cue tag to be resolved by the target.
+			</description>
+		</method>
+		<method name="add_effect">
+			<return type="void" />
+			<param index="0" name="effect" type="ASEffect" />
+			<description>
+				Adds a direct [ASEffect] resource to the package.
+			</description>
+		</method>
+		<method name="add_effect_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Adds an effect tag to be resolved by the target.
+			</description>
+		</method>
+		<method name="clear_cues">
+			<return type="void" />
+			<description>
+				Clears all cues from the package.
+			</description>
+		</method>
+		<method name="clear_effects">
+			<return type="void" />
+			<description>
+				Clears all effects from the package.
+			</description>
+		</method>
+		<method name="remove_cue">
+			<return type="void" />
+			<param index="0" name="cue" type="ASCue" />
+			<description>
+			</description>
+		</method>
+		<method name="remove_cue_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+			</description>
+		</method>
+		<method name="remove_effect">
+			<return type="void" />
+			<param index="0" name="effect" type="ASEffect" />
+			<description>
+			</description>
+		</method>
+		<method name="remove_effect_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="cues_resources" type="ASCue[]" setter="set_cues" getter="get_cues" default="[]">
+			List of direct [ASCue] resources.
+		</member>
+		<member name="cues_tags" type="StringName[]" setter="set_cue_tags" getter="get_cue_tags" default="[]">
+			List of cue tags.
+		</member>
+		<member name="effects_resources" type="ASEffect[]" setter="set_effects" getter="get_effects" default="[]">
+			List of direct [ASEffect] resources.
+		</member>
+		<member name="effects_tags" type="StringName[]" setter="set_effect_tags" getter="get_effect_tags" default="[]">
+			List of effect tags.
+		</member>
+	</members>
+</class>

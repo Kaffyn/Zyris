@@ -31,6 +31,7 @@
 #pragma once
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
+#include "src/core/ability_system.h"
 #include <godot_cpp/classes/accept_dialog.hpp>
 #include <godot_cpp/classes/button.hpp>
 #include <godot_cpp/classes/editor_property.hpp>
@@ -40,6 +41,7 @@
 #include <godot_cpp/classes/tree.hpp>
 #else
 #include "editor/inspector/editor_inspector.h"
+#include "modules/ability_system/core/ability_system.h"
 #include "scene/gui/button.h"
 #include "scene/gui/dialogs.h"
 #include "scene/gui/label.h"
@@ -48,10 +50,7 @@
 #include "scene/gui/tree.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
+namespace godot {
 class ASEditorPropertySelector : public EditorProperty {
 	GDCLASS(ASEditorPropertySelector, EditorProperty);
 
@@ -60,6 +59,7 @@ class ASEditorPropertySelector : public EditorProperty {
 	LineEdit *search_edit = nullptr;
 	Tree *tags_tree = nullptr;
 	bool updating = false;
+	ASTagType filter_type = ASTagType::CONDITIONAL;
 
 	void _edit_pressed();
 	void _update_tree();
@@ -76,7 +76,7 @@ public:
 #else
 	virtual void _update_property() override;
 #endif
-
+	void set_filter_type(ASTagType p_type) { filter_type = p_type; }
 	ASEditorPropertySelector();
 };
 
@@ -109,12 +109,20 @@ class ASEditorPropertyTagSelector : public EditorProperty {
 	OptionButton *options = nullptr;
 	bool updating = false;
 
+	// Controls which tag type is shown in this selector.
+	// Set by the InspectorPlugin based on property semantics:
+	//   ASTagType::NAME     -> identity fields (ability_tag, cue_tag, effect_tag)
+	//   ASTagType::CONDITIONAL -> state predicate items within _tags arrays
+	//   ASTagType::EVENT    -> event trigger tag fields
+	ASTagType filter_type = ASTagType::NAME;
+
 	void _option_selected(int p_index);
 
 protected:
 	static void _bind_methods();
 
 public:
+	void set_filter_type(ASTagType p_type) { filter_type = p_type; }
 #ifndef ABILITY_SYSTEM_GDEXTENSION
 	virtual void update_property() override;
 #else
@@ -123,3 +131,4 @@ public:
 
 	ASEditorPropertyTagSelector();
 };
+} // namespace godot

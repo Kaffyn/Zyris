@@ -36,9 +36,7 @@
 #include "modules/ability_system/resources/as_attribute.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASAttribute::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_attribute_name", "name"), &ASAttribute::set_attribute_name);
@@ -73,7 +71,7 @@ void ASAttribute::set_attribute_name(const String &p_name) {
 			as->unregister_tag(attribute_name);
 		}
 		as->register_resource_name(p_name, get_instance_id());
-		as->register_tag(p_name, AbilitySystem::TAG_TYPE_NAME, get_instance_id());
+		as->register_tag(p_name, (ASTagType)AbilitySystem::TAG_TYPE_NAME, get_instance_id());
 	}
 	attribute_name = p_name;
 }
@@ -135,3 +133,4 @@ ASAttribute::ASAttribute() {
 
 ASAttribute::~ASAttribute() {
 }
+} // namespace godot

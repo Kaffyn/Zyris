@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASNameTag" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Persistent identity tag for long-lasting state (State.Stunned, Class.Warrior).
+	</brief_description>
+	<description>
+		ASNameTag represents persistent identity or state tags that remain until explicitly removed.
+		Used for character states (State.Stunned, State.Dead), class affiliation (Class.Warrior),
+		team membership (Team.Blue), and other long-term identity markers.
+
+		These tags form the foundation of an actor's persistent identity and are typically
+		managed through ASComponent's add_tag/remove_tag methods.
+
+		From BUSINESS_RULES.md: "Represent persistent identity or state."
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="create" qualifiers="static">
+			<return type="ASNameTag" />
+			<param index="0" name="name" type="StringName" />
+			<description>
+				Creates a new ASNameTag with the specified name.
+			</description>
+		</method>
+		<method name="STUNNED" qualifiers="static">
+			<return type="ASNameTag" />
+			<description>
+				Returns a predefined STUNNED state tag.
+			</description>
+		</method>
+		<method name="DEAD" qualifiers="static">
+			<return type="ASNameTag" />
+			<description>
+				Returns a predefined DEAD state tag.
+			</description>
+		</method>
+		<method name="INVISIBLE" qualifiers="static">
+			<return type="ASNameTag" />
+			<description>
+				Returns a predefined INVISIBLE state tag.
+			</description>
+		</method>
+		<method name="WARRIOR" qualifiers="static">
+			<return type="ASNameTag" />
+			<description>
+				Returns a predefined WARRIOR class tag.
+			</description>
+		</method>
+		<method name="MAGE" qualifiers="static">
+			<return type="ASNameTag" />
+			<description>
+				Returns a predefined MAGE class tag.
+			</description>
+		</method>
+		<method name="ARCHER" qualifiers="static">
+			<return type="ASNameTag" />
+			<description>
+				Returns a predefined ARCHER class tag.
+			</description>
+		</method>
+		<method name="TEAM_BLUE" qualifiers="static">
+			<return type="ASNameTag" />
+			<description>
+				Returns a predefined TEAM_BLUE tag.
+			</description>
+		</method>
+		<method name="TEAM_RED" qualifiers="static">
+			<return type="ASNameTag" />
+			<description>
+				Returns a predefined TEAM_RED tag.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="tag_name" type="StringName" />
+		<member name="tag_type" type="int" enum="ASTagType" />
+	</members>
+	<constants>
+		<constant name="NAME" value="0" enum="ASTagType">
+			Tag type for persistent identity tags.
+		</constant>
+	</constants>
+</class>

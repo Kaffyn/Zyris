@@ -34,7 +34,7 @@
 			<return type="void" />
 			<param index="0" name="target" type="Node" />
 			<description>
-				Delivers the [member package] to the target [ASComponent] (or its parents/children if the node itself isn't one).
+				Delivers the payload of an [ASPackage] to the target component. Automatically dispatches [ASEventTag]s defined in the package upon successful delivery.
 			</description>
 		</method>
 		<method name="is_delivery_valid" qualifiers="const">

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="BTConditionAS_HasTag" inherits="BTCondition" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../doc/class.xsd">
+	<brief_description>
+		BTCondition that checks if the agent has a specific Ability System tag.
+	</brief_description>
+	<description>
+		A Behavior Tree condition that checks if the actor's [ASComponent] has a specific tag. Returns [constant BT.SUCCESS] if tag present, [constant BT.FAILURE] otherwise.
+		Supports hierarchical matching (e.g., checking [code]State[/code] matches [code]State.Stunned[/code]).
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_exact_match">
+			<return type="bool" />
+			<description>
+				Returns whether to use exact tag matching.
+			</description>
+		</method>
+		<method name="get_tag">
+			<return type="StringName" />
+			<description>
+				Returns the tag to check for.
+			</description>
+		</method>
+		<method name="set_exact_match">
+			<return type="void" />
+			<param index="0" name="exact" type="bool" />
+			<description>
+				If [code]true[/code], requires exact tag match. If [code]false[/code], allows hierarchical matching.
+			</description>
+		</method>
+		<method name="set_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Sets the tag to check for.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="exact_match" type="bool" setter="set_exact_match" getter="get_exact_match" default="false" />
+		<member name="tag" type="StringName" setter="set_tag" getter="get_tag" default="&amp;&quot;&amp;quot;" />
+	</members>
+</class>

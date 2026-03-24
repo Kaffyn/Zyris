@@ -41,11 +41,7 @@
 #include "core/variant/variant.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
-// Forward declarations to break circularity
+namespace godot {
 class ASCue;
 class ASComponent;
 class ASEffectSpec;
@@ -121,10 +117,11 @@ public:
 	float get_magnitude() const { return magnitude; }
 
 	// --- Level ---
-	void set_level(float p_level) { level = p_level; }
+	void set_level(float p_lvl) { level = p_lvl; }
 	float get_level() const { return level; }
 
 	// --- Extra Data ---
 	void set_extra_data(const Dictionary &p_data) { extra_data = p_data; }
 	Dictionary get_extra_data() const { return extra_data; }
 };
+} // namespace godot

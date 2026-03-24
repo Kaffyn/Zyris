@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEffectState" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Represents the current state of an active effect.
+	</brief_description>
+	<description>
+		ASEffectState stores all necessary information about an active effect
+		for serialization, state management, and rollback purposes.
+
+		Used by ASStateCache and ASComponentState to save and restore effect states.
+		Contains timing information, stack data, and effect level for complete state reconstruction.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="is_expired" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if the effect's remaining time has expired (≤ 0.0).
+			</description>
+		</method>
+		<method name="is_period_ready" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if the effect's period timer is ready (≤ 0.0).
+			</description>
+		</method>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the effect state to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads effect state data from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="tag" type="StringName" setter="set_tag" getter="get_tag" default="&quot;&quot;">
+			The effect tag identifying this effect type.
+		</member>
+		<member name="remaining_time" type="float" setter="set_remaining_time" getter="get_remaining_time" default="0.0">
+			Remaining duration before the effect expires.
+		</member>
+		<member name="period_timer" type="float" setter="set_period_timer" getter="get_period_timer" default="0.0">
+			Time remaining until the next periodic trigger.
+		</member>
+		<member name="stack_count" type="int" setter="set_stack_count" getter="get_stack_count" default="1">
+			Current stack count for stackable effects.
+		</member>
+		<member name="level" type="float" setter="set_level" getter="get_level" default="1.0">
+			Effect level/multiplier for scaling effect potency.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASTagBase" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Base structure for all Ability System tag types with common functionality.
+	</brief_description>
+	<description>
+		ASTagBase provides the foundation for all tag types in the Ability System.
+		It contains common functionality for tag validation, type checking, and utility methods.
+
+		This is the base struct that ASNameTag, ASConditionalTag, and ASEventTagTag inherit from.
+		It follows the LimboAI bb_param pattern for type-safe tag handling.
+
+		All tags must be registered in the AbilitySystem global registry to be considered valid.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="is_valid">
+			<return type="bool" />
+			<description>
+				Returns true if the tag is registered in the AbilitySystem global registry.
+			</description>
+		</method>
+		<method name="is_name_tag">
+			<return type="bool" />
+			<description>
+				Returns true if this tag is a NAME type tag.
+			</description>
+		</method>
+		<method name="is_conditional_tag">
+			<return type="bool" />
+			<description>
+				Returns true if this tag is a CONDITIONAL type tag.
+			</description>
+		</method>
+		<method name="is_event_tag">
+			<return type="bool" />
+			<description>
+				Returns true if this tag is an EVENT type tag.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="tag_name" type="StringName" />
+		<member name="tag_type" type="int" enum="ASTagType" />
+	</members>
+	<constants>
+		<constant name="NAME" value="0" enum="ASTagType">
+			Persistent identity tag type.
+		</constant>
+		<constant name="CONDITIONAL" value="1" enum="ASTagType">
+			Requirement/block tag type.
+		</constant>
+		<constant name="EVENT" value="2" enum="ASTagType">
+			Event dispatcher tag type.
+		</constant>
+	</constants>
+</class>

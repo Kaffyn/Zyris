@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef AS_STATE_SNAPSHOT_H
-#define AS_STATE_SNAPSHOT_H
+#pragma once
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include <godot_cpp/classes/resource.hpp>
@@ -42,10 +41,7 @@
 #include "core/variant/variant.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
+namespace godot {
 class ASComponent;
 
 /**
@@ -89,5 +85,4 @@ public:
 	ASStateSnapshot();
 	~ASStateSnapshot();
 };
-
-#endif // AS_STATE_SNAPSHOT_H
+} // namespace godot

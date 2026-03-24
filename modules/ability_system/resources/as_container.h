@@ -31,22 +31,22 @@
 #pragma once
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
+#include "src/resources/as_ability.h"
 #include "src/resources/as_attribute_set.h"
+#include "src/resources/as_cue.h"
+#include "src/resources/as_effect.h"
 #include <godot_cpp/classes/resource.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 #else
 #include "core/io/resource.h"
 #include "core/variant/typed_array.h"
+#include "modules/ability_system/resources/as_ability.h"
 #include "modules/ability_system/resources/as_attribute_set.h"
+#include "modules/ability_system/resources/as_cue.h"
+#include "modules/ability_system/resources/as_effect.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
-class ASAbility;
-class ASEffect;
-class ASCue;
+namespace godot {
 
 /**
  * ASContainer
@@ -73,25 +73,32 @@ private:
 	// Cue resources for visual/audio feedback.
 	TypedArray<ASCue> cues;
 
+	// Event tags this archetype is subscribed to.
+	TypedArray<StringName> events;
+
 protected:
 	static void _bind_methods();
 
 public:
 	// Abilities (catalog)
-	void set_abilities(const TypedArray<ASAbility> &p_abilities) { abilities = p_abilities; }
-	TypedArray<ASAbility> get_abilities() const { return abilities; }
+	void set_abilities(const TypedArray<ASAbility> &p_abilities);
+	TypedArray<ASAbility> get_abilities() const;
 
 	// Effects
-	void set_effects(const TypedArray<ASEffect> &p_effects) { effects = p_effects; }
-	TypedArray<ASEffect> get_effects() const { return effects; }
+	void set_effects(const TypedArray<ASEffect> &p_effects);
+	TypedArray<ASEffect> get_effects() const;
 
 	// AttributeSet
-	void set_attribute_set(const Ref<ASAttributeSet> &p_set) { attribute_set = p_set; }
-	Ref<ASAttributeSet> get_attribute_set() const { return attribute_set; }
+	void set_attribute_set(const Ref<ASAttributeSet> &p_set);
+	Ref<ASAttributeSet> get_attribute_set() const;
 
 	// Cues
-	void set_cues(const TypedArray<ASCue> &p_cues) { cues = p_cues; }
-	TypedArray<ASCue> get_cues() const { return cues; }
+	void set_cues(const TypedArray<ASCue> &p_cues);
+	TypedArray<ASCue> get_cues() const;
+
+	// Events (Subscription)
+	void set_events(const TypedArray<StringName> &p_events);
+	TypedArray<StringName> get_events() const;
 
 	// Dynamic modification
 	void add_ability(const Ref<ASAbility> &p_ability);
@@ -107,3 +114,4 @@ public:
 	ASContainer();
 	~ASContainer();
 };
+} // namespace godot

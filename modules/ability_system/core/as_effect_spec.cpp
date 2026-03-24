@@ -33,6 +33,7 @@
 #include "src/core/as_tag_spec.h"
 #include "src/resources/as_effect.h"
 #include "src/scene/as_component.h"
+#include <godot_cpp/core/class_db.hpp>
 #else
 #include "modules/ability_system/core/as_effect_spec.h"
 #include "modules/ability_system/core/as_tag_spec.h"
@@ -40,9 +41,7 @@
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASEffectSpec::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("init", "effect", "level"), &ASEffectSpec::init, DEFVAL(1.0f));
@@ -75,9 +74,9 @@ void ASEffectSpec::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "target_node"), "set_target_node", "get_target_node");
 }
 
-void ASEffectSpec::init(Ref<ASEffect> p_effect, float p_level) {
+void ASEffectSpec::init(godot::Ref<godot::ASEffect> p_effect, float p_lvl) {
 	effect = p_effect;
-	level = p_level;
+	level = p_lvl;
 	if (effect.is_valid()) {
 		if (effect->get_duration_policy() == ASEffect::POLICY_DURATION) {
 			total_duration = effect->get_duration_magnitude();
@@ -152,3 +151,5 @@ ASEffectSpec::ASEffectSpec() {
 
 ASEffectSpec::~ASEffectSpec() {
 }
+
+} // namespace godot

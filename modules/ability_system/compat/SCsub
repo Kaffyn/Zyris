@@ -1,0 +1,21 @@
+# SCsub - Build configuration for Compat Layer
+
+Import("env")
+
+# Compat layer compilation strategy:
+# - When LimboAI module IS present: only compile as_project_settings_compat
+#   (LimboAI classes come from the real module, no stubs needed)
+# - When LimboAI module is NOT present: compile all compat stubs including
+#   limboai_blackboard, limboai_bt, limboai_hsm, limboai_task_db
+
+if env.get("module_limboai_enabled", False):
+    # LimboAI module present — only build non-LimboAI compat files
+    compat_sources = ["as_project_settings_compat.cpp"]
+    env.add_source_files(env.modules_sources, compat_sources)
+    env.Append(CPPPATH=["#modules/limboai"])
+    print("Compat: LimboAI module detected, skipping stub implementations.")
+else:
+    # LimboAI not present — build all stubs
+    sources = Glob("*.cpp")
+    env.add_source_files(env.modules_sources, sources)
+    print("Compat: LimboAI not detected, building stub implementations.")

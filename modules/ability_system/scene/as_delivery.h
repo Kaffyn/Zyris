@@ -38,10 +38,7 @@
 #include "scene/main/node.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
+namespace godot {
 class ASComponent;
 
 /**
@@ -88,7 +85,7 @@ public:
 	void set_package(const Ref<ASPackage> &p_package);
 	Ref<ASPackage> get_package() const;
 
-	void set_level(float p_level) { level = p_level; }
+	void set_level(float p_lvl) { level = p_lvl; }
 	float get_level() const { return level; }
 
 	// Lifecycle
@@ -120,3 +117,4 @@ public:
 	ASDelivery();
 	~ASDelivery();
 };
+} // namespace godot

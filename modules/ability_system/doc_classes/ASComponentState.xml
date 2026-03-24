@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASComponentState" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Complete state representation of an ASComponent for serialization.
+	</brief_description>
+	<description>
+		ASComponentState provides a comprehensive snapshot of an ASComponent's
+		entire state, including historical data. Designed for save/load operations,
+		full serialization, and complete state transfer between game sessions.
+
+		Unlike ASStateCache which stores minimal data for performance-critical rollback,
+		ASComponentState captures the complete component state including:
+		- All attributes and their values
+		- All tags currently owned
+		- All active effects with full state
+		- All cooldowns and remaining times
+		- Complete historical buffers for all tag types
+
+		Used by save systems, network replication, and debugging tools.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="clear">
+			<return type="void" />
+			<description>
+				Clears all state data and resets tick to 0.
+			</description>
+		</method>
+		<method name="is_valid" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if this state contains valid data (tick > 0).
+			</description>
+		</method>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the complete component state to a Dictionary for serialization.
+				Includes all historical data and metadata.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads complete component state from a Dictionary created by to_dict().
+			</description>
+		</method>
+		<method name="capture_from_component">
+			<return type="void" />
+			<param index="0" name="component" type="ASComponent" />
+			<description>
+				Captures the complete state from an ASComponent including all historical data.
+			</description>
+		</method>
+		<method name="apply_to_component">
+			<return type="void" />
+			<param index="0" name="component" type="ASComponent" />
+			<description>
+				Applies the complete state to an ASComponent, restoring all data including history.
+			</description>
+		</method>
+		<method name="equals" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="other" type="ASComponentState" />
+			<description>
+				Performs deep equality comparison between two component states.
+				Returns true only if all data including history matches exactly.
+			</description>
+		</method>
+		<method name="compute_diff" qualifiers="const">
+			<return type="ASComponentState" />
+			<param index="0" name="other" type="ASComponentState" />
+			<description>
+				Computes the difference between this state and another state.
+				Returns a minimal state containing only the differences.
+			</description>
+		</method>
+		<method name="apply_diff">
+			<return type="void" />
+			<param index="0" name="diff" type="ASComponentState" />
+			<description>
+				Applies a diff state to this component state, updating only the differences.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="tick" type="int" setter="set_tick" getter="get_tick" default="0">
+			The tick number this state represents.
+		</member>
+		<member name="attributes" type="HashMap" setter="set_attributes" getter="get_attributes" default="{}">
+			Complete map of attribute names to their current values.
+		</member>
+		<member name="tags" type="PackedStringArray" setter="set_tags" getter="get_tags" default="[]">
+			Array of all tags currently owned by the component.
+		</member>
+		<member name="active_effects" type="Array" setter="set_active_effects" getter="get_active_effects" default="[]">
+			Array of ASEffectState objects representing all active effects.
+		</member>
+		<member name="cooldowns" type="HashMap" setter="set_cooldowns" getter="get_cooldowns" default="{}">
+			Map of cooldown names to ASCooldownData objects.
+		</member>
+		<member name="name_history" type="Array" setter="set_name_history" getter="get_name_history" default="[]">
+			Complete NAME tag historical buffer.
+		</member>
+		<member name="conditional_history" type="Array" setter="set_conditional_history" getter="get_conditional_history" default="[]">
+			Complete CONDITIONAL tag historical buffer.
+		</member>
+		<member name="event_history" type="Array" setter="set_event_history" getter="get_event_history" default="[]">
+			Complete EVENT tag historical buffer.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

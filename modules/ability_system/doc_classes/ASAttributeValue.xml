@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASAttributeValue" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Stores base and current values for attributes.
+	</brief_description>
+	<description>
+		ASAttributeValue maintains both the base value and current modified value
+		of an attribute. The base value represents the original value before
+		modifiers, while the current value reflects all active modifications.
+
+		Key features:
+		- Base value preservation for modifier calculations
+		- Current value tracking for runtime attribute access
+		- Difference calculation for effect magnitude
+		- Serialization support for state management
+
+		Used by ASAttributeSet to store attribute values and by the effect
+		system to calculate and apply attribute modifications.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="set_base">
+			<return type="void" />
+			<param index="0" name="value" type="float" />
+			<description>
+				Sets both base and current values to the specified value.
+				Used when resetting attributes or setting initial values.
+			</description>
+		</method>
+		<method name="set_current">
+			<return type="void" />
+			<param index="0" name="value" type="float" />
+			<description>
+				Sets only the current value, preserving the base value.
+				Used by modifiers to apply changes without affecting the base.
+			</description>
+		</method>
+		<method name="get_difference" qualifiers="const">
+			<return type="float" />
+			<description>
+				Returns the difference between current and base values.
+				Positive values indicate increases, negative values indicate decreases.
+			</description>
+		</method>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the attribute value to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads attribute value from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="base_value" type="float" setter="set_base_value" getter="get_base_value" default="0.0">
+			The original value before any modifiers are applied.
+		</member>
+		<member name="current_value" type="float" setter="set_current_value" getter="get_current_value" default="0.0">
+			The current value after all modifiers are applied.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

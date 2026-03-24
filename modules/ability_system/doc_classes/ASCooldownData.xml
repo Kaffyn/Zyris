@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASCooldownData" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Stores cooldown information for abilities and tags.
+	</brief_description>
+	<description>
+		ASCooldownData manages cooldown timing and associated tags for abilities
+		or game mechanics that require time-based restrictions.
+
+		Used by ASComponent to track active cooldowns and prevent premature reuse.
+		Supports both single ability cooldowns and group cooldowns through associated tags.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="is_expired" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if the cooldown has expired (remaining ≤ 0.0).
+			</description>
+		</method>
+		<method name="update">
+			<return type="void" />
+			<param index="0" name="delta" type="float" />
+			<description>
+				Updates the remaining cooldown time by subtracting delta time.
+				Clamps to minimum 0.0 to prevent negative values.
+			</description>
+		</method>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts cooldown data to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads cooldown data from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="remaining" type="float" setter="set_remaining" getter="get_remaining" default="0.0">
+			Remaining time in seconds before cooldown expires.
+		</member>
+		<member name="tags" type="PackedStringArray" setter="set_tags" getter="get_tags" default="[]">
+			Array of tags affected by this cooldown for group cooldown management.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

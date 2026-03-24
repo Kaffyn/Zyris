@@ -30,21 +30,21 @@
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include "src/editor/as_editor_plugin.h"
+#include "src/compat/as_project_settings_compat.h"
 #include "src/editor/as_inspector_plugin.h"
 #include "src/editor/as_tags_panel.h"
 #include <godot_cpp/classes/editor_plugin.hpp>
 #include <godot_cpp/classes/tab_container.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #else
-#include "editor/settings/project_settings_editor.h"
+#include "modules/ability_system/compat/as_project_settings_compat.h"
 #include "modules/ability_system/editor/as_editor_plugin.h"
 #include "modules/ability_system/editor/as_inspector_plugin.h"
 #include "modules/ability_system/editor/as_tags_panel.h"
 #include "scene/gui/tab_container.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASEditorPlugin::_bind_methods() {
 }
@@ -54,13 +54,11 @@ ASEditorPlugin::ASEditorPlugin() {
 	inspector_plugin.instantiate();
 	add_inspector_plugin(inspector_plugin);
 
-#ifndef ABILITY_SYSTEM_GDEXTENSION
-	ProjectSettingsEditor *ps_editor = ProjectSettingsEditor::get_singleton();
-	if (ps_editor) {
-		TabContainer *tabs = ps_editor->get_tabs();
+	TabContainer *tabs = ASProjectSettingsCompat::get_project_settings_tabs();
+	if (tabs) {
 		for (int i = 0; i < tabs->get_child_count(); i++) {
 			Node *c = tabs->get_child(i);
-			if (c->get_name() == "Ability System Tags") {
+			if (c->get_name() == StringName("Ability System Tags")) {
 				return; // Already added
 			}
 		}
@@ -68,11 +66,11 @@ ASEditorPlugin::ASEditorPlugin() {
 		ASTagsPanel *tags_editor = memnew(ASTagsPanel);
 		tags_editor->set_name("Ability System Tags");
 		tabs->add_child(tags_editor);
-		tabs->set_tab_title(tabs->get_tab_count() - 1, TTR("Ability System Tags"));
+		tabs->set_tab_title(tabs->get_tab_count() - 1, "Ability System Tags");
 		tabs->move_child(tags_editor, 2);
 	}
-#endif
 }
 
 ASEditorPlugin::~ASEditorPlugin() {
 }
+} // namespace godot

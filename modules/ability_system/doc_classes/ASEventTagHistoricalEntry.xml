@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEventTagHistoricalEntry" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Historical entry for event occurrences.
+	</brief_description>
+	<description>
+		ASEventTagHistoricalEntry stores a complete event occurrence in the
+		historical buffer. Contains the full event data plus the tick when
+		it was recorded, enabling precise event tracking and rollback.
+
+		Used by ASComponent's event history buffer to maintain a chronological
+		record of all events for analysis, debugging, and multiplayer
+		synchronization purposes.
+
+		Combined with the historical query APIs, enables powerful event
+		analysis like "did damage occur in the last 2 seconds" or
+		"how many times was this ability activated recently".
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the historical entry to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads historical entry from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="data" type="ASEventTagData" setter="set_data" getter="get_data">
+			The complete event data for this historical entry.
+		</member>
+		<member name="tick" type="int" setter="set_tick" getter="get_tick" default="0">
+			The tick when this event was recorded.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

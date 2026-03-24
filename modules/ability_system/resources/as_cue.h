@@ -44,10 +44,7 @@
 #include "modules/ability_system/core/as_cue_spec.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
+namespace godot {
 class ASCue : public Resource {
 	GDCLASS(ASCue, Resource);
 
@@ -107,5 +104,6 @@ public:
 	ASCue();
 	~ASCue();
 };
+} // namespace godot
 
-VARIANT_ENUM_CAST(ASCue::CueEventType);
+VARIANT_ENUM_CAST(godot::ASCue::CueEventType);

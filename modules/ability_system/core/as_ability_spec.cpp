@@ -38,13 +38,13 @@
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASAbilitySpec::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("init", "ability", "level"), &ASAbilitySpec::init, DEFVAL(1));
 	ClassDB::bind_method(D_METHOD("get_ability"), &ASAbilitySpec::get_ability);
+	ClassDB::bind_method(D_METHOD("get_active_effects"), &ASAbilitySpec::get_active_effects);
+	ClassDB::bind_method(D_METHOD("get_current_phase_index"), &ASAbilitySpec::get_current_phase_index);
 	ClassDB::bind_method(D_METHOD("get_is_active"), &ASAbilitySpec::get_is_active);
 	ClassDB::bind_method(D_METHOD("set_is_active", "active"), &ASAbilitySpec::set_is_active);
 	ClassDB::bind_method(D_METHOD("get_level"), &ASAbilitySpec::get_level);
@@ -62,11 +62,15 @@ void ASAbilitySpec::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_on_cooldown"), &ASAbilitySpec::is_on_cooldown);
 	ClassDB::bind_method(D_METHOD("get_cost_amount", "attribute"), &ASAbilitySpec::get_cost_amount);
 	ClassDB::bind_method(D_METHOD("get_effects_for_target", "target_type"), &ASAbilitySpec::get_effects_for_target);
+
+	ClassDB::bind_method(D_METHOD("add_sub_spec", "spec"), &ASAbilitySpec::add_sub_spec);
+	ClassDB::bind_method(D_METHOD("remove_sub_spec", "spec"), &ASAbilitySpec::remove_sub_spec);
+	ClassDB::bind_method(D_METHOD("get_sub_specs"), &ASAbilitySpec::get_sub_specs);
 }
 
-void ASAbilitySpec::init(Ref<ASAbility> p_ability, int p_level) {
+void ASAbilitySpec::init(Ref<ASAbility> p_ability, int p_lvl) {
 	ability = p_ability;
-	level = p_level;
+	level = p_lvl;
 }
 
 void ASAbilitySpec::set_owner(ASComponent *p_owner) {
@@ -98,6 +102,22 @@ bool ASAbilitySpec::tick(float p_delta) {
 	}
 
 	return false;
+}
+
+TypedArray<ASAbilitySpec> ASAbilitySpec::get_sub_specs() const {
+	TypedArray<ASAbilitySpec> arr;
+	for (int i = 0; i < sub_specs.size(); i++) {
+		arr.push_back(sub_specs[i]);
+	}
+	return arr;
+}
+
+TypedArray<ASEffectSpec> ASAbilitySpec::get_active_effects() const {
+	TypedArray<ASEffectSpec> arr;
+	for (int i = 0; i < active_effects.size(); i++) {
+		arr.push_back(active_effects[i]);
+	}
+	return arr;
 }
 
 void ASAbilitySpec::activate(Object *p_target_node) {
@@ -268,8 +288,16 @@ void ASAbilitySpec::clear_active_effects() {
 	active_effects.clear();
 }
 
+void ASAbilitySpec::remove_sub_spec(Ref<ASAbilitySpec> p_spec) {
+	int idx = sub_specs.find(p_spec);
+	if (idx != -1) {
+		sub_specs.remove_at(idx);
+	}
+}
+
 ASAbilitySpec::ASAbilitySpec() {
 }
 
 ASAbilitySpec::~ASAbilitySpec() {
 }
+} // namespace godot

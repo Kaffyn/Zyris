@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASNameTagHistoricalEntry" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Historical entry for NAME tag changes.
+	</brief_description>
+	<description>
+		ASNameTagHistoricalEntry records when NAME tags (persistent identity tags)
+		are added or removed from a component. Stores the tag name, target,
+		timestamp, tick, and whether it was an addition or removal.
+
+		NAME tags typically represent persistent states like:
+		- State.Stunned, State.Stealthed, State.Flying
+		- Class.Warrior, Class.Mage, Class.Rogue
+		- Team.Red, Team.Blue, Team.Neutral
+
+		Used by the historical query system to track state changes over time,
+		enable rollback functionality, and support complex game logic that
+		depends on recent state changes.
+
+		Example queries: "Was the player stunned in the last 3 seconds?"
+		or "How many times did the player enter stealth recently?"
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_target" qualifiers="const">
+			<return type="Node" />
+			<description>
+				Returns the target node, or null if not available.
+			</description>
+		</method>
+		<method name="set_target">
+			<return type="void" />
+			<param index="0" name="node" type="Node" />
+			<description>
+				Sets the target node (stores ObjectID internally).
+			</description>
+		</method>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the historical entry to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads historical entry from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="tag_name" type="StringName" setter="set_tag_name" getter="get_tag_name" default="&quot;&quot;">
+			The NAME tag that was added or removed.
+		</member>
+		<member name="target_id" type="int" setter="set_target_id" getter="get_target_id" default="0">
+			ObjectID of the node this tag change affected.
+		</member>
+		<member name="timestamp" type="float" setter="set_timestamp" getter="get_timestamp" default="0.0">
+			Timestamp when this tag change occurred (seconds since start).
+		</member>
+		<member name="tick_id" type="int" setter="set_tick_id" getter="get_tick_id" default="0">
+			Tick ID for multiplayer synchronization and rollback.
+		</member>
+		<member name="added" type="bool" setter="set_added" getter="get_added" default="true">
+			True if the tag was added, false if it was removed.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

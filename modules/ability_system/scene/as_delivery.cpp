@@ -46,9 +46,7 @@
 #include "scene/3d/physics/area_3d.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASDelivery::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_source_component", "source"), &ASDelivery::set_source_component);
@@ -121,12 +119,14 @@ void ASDelivery::_notification(int p_what) {
 }
 
 void ASDelivery::_check_auto_connect() {
-	if (connected)
+	if (connected) {
 		return;
+	}
 
 	Node *parent = get_parent();
-	if (!parent)
+	if (!parent) {
 		return;
+	}
 
 	Area2D *a2d = Object::cast_to<Area2D>(parent);
 	if (a2d) {
@@ -165,18 +165,22 @@ void ASDelivery::deactivate() {
 }
 
 bool ASDelivery::is_delivery_valid() const {
-	if (!is_active)
+	if (!is_active) {
 		return false;
-	if (life_span > 0.0f && timer <= 0.0f)
+	}
+	if (life_span > 0.0f && timer <= 0.0f) {
 		return false;
+	}
 	return true;
 }
 
 bool ASDelivery::can_deliver_to(Node *p_target) const {
-	if (!is_delivery_valid())
+	if (!is_delivery_valid()) {
 		return false;
-	if (!p_target)
+	}
+	if (!p_target) {
 		return false;
+	}
 
 	if (target_groups.size() > 0) {
 		bool in_group = false;
@@ -186,24 +190,27 @@ bool ASDelivery::can_deliver_to(Node *p_target) const {
 				break;
 			}
 		}
-		if (!in_group)
+		if (!in_group) {
 			return false;
+		}
 	}
 
 	return true;
 }
 
 void ASDelivery::deliver(Node *p_target) {
-	if (!can_deliver_to(p_target))
+	if (!can_deliver_to(p_target)) {
 		return;
+	}
 
 	ASComponent *target_asc = Object::cast_to<ASComponent>(p_target);
 	if (!target_asc) {
 		// Try children
 		for (int i = 0; i < p_target->get_child_count(); i++) {
 			target_asc = Object::cast_to<ASComponent>(p_target->get_child(i));
-			if (target_asc)
+			if (target_asc) {
 				break;
+			}
 		}
 	}
 
@@ -215,8 +222,9 @@ void ASDelivery::deliver(Node *p_target) {
 			if (!target_asc) {
 				for (int i = 0; i < parent->get_child_count(); i++) {
 					target_asc = Object::cast_to<ASComponent>(parent->get_child(i));
-					if (target_asc)
+					if (target_asc) {
 						break;
+					}
 				}
 			}
 		}
@@ -230,22 +238,37 @@ void ASDelivery::deliver(Node *p_target) {
 			if (!target_asc) {
 				for (int i = 0; i < owner->get_child_count(); i++) {
 					target_asc = Object::cast_to<ASComponent>(owner->get_child(i));
-					if (target_asc)
+					if (target_asc) {
 						break;
+					}
 				}
 			}
 		}
 	}
 
-	if (!target_asc)
+	if (!target_asc) {
 		return;
+	}
 
-	if (package.is_null())
+	if (package.is_null()) {
 		return;
+	}
 
 	// Deliver the package via the target component
 	ASComponent *source_component = get_source_component();
 	target_asc->apply_package(package, level, source_component);
+
+	// Dispatch Historical Event
+	StringName package_tag = package->get_package_tag();
+	if (package_tag != StringName()) {
+		target_asc->dispatch_event(package_tag, source_component, level);
+	}
+
+	// Dispatch Package Events
+	TypedArray<StringName> deliver_events = package->get_events_on_deliver();
+	for (int i = 0; i < deliver_events.size(); i++) {
+		target_asc->dispatch_event(deliver_events[i], source_component, level);
+	}
 
 	emit_signal("delivered", p_target);
 
@@ -287,3 +310,4 @@ void ASDelivery::set_active(bool p_active) {
 	is_active = p_active;
 	set_physics_process(is_active && life_span > 0.0f);
 }
+} // namespace godot

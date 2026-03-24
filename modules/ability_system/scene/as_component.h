@@ -32,41 +32,39 @@
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include "src/core/as_effect_spec.h"
+#include "src/core/as_tag_types.h"
 #include "src/resources/as_ability.h"
+#include "src/resources/as_state_snapshot.h"
 #include <godot_cpp/classes/audio_stream.hpp>
 #include <godot_cpp/classes/node.hpp>
-#include <godot_cpp/core/gdvirtual.gen.inc>
-#include <godot_cpp/core/type_info.hpp>
+#include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/templates/hash_map.hpp>
 #include <godot_cpp/templates/vector.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
 #else
-#include "core/object/gdvirtual.gen.inc"
-#include "core/object/object.h"
+#include "core/object/ref_counted.h"
 #include "core/templates/hash_map.h"
 #include "core/templates/vector.h"
 #include "modules/ability_system/core/as_effect_spec.h"
+#include "modules/ability_system/core/as_tag_types.h"
 #include "modules/ability_system/resources/as_ability.h"
+#include "modules/ability_system/resources/as_state_snapshot.h"
 #include "scene/main/node.h"
 #include "servers/audio/audio_stream.h"
 #endif
 
 // In Native mode, engine classes live in the global namespace.
-#ifndef ABILITY_SYSTEM_GDEXTENSION
-
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+namespace godot {
 class CharacterBody2D;
 class CharacterBody3D;
-class AnimationPlayer;
-class AnimatedSprite2D;
-class AnimatedSprite3D;
-class AudioStreamPlayer;
-class AudioStreamPlayer2D;
-class AudioStreamPlayer3D;
+} // namespace godot
+#else
+class CharacterBody2D;
+class CharacterBody3D;
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
+namespace godot {
 class ASAttributeSet;
 class ASTagSpec;
 class ASAttribute;
@@ -74,25 +72,15 @@ class ASAttribute;
 class ASAbility;
 class ASAbilitySpec;
 class ASEffect;
-class ASCue;
-class ASCueSpec;
+class ASEffectSpec;
 class ASContainer;
 class ASPackage;
 class ASStateSnapshot;
+class ASCue;
+class ASCueSpec;
+class ASComponent;
 
-// In GDExtension mode, all Godot classes live inside namespace godot.
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-namespace godot {
-class CharacterBody2D;
-class CharacterBody3D;
-class AnimationPlayer;
-class AnimatedSprite2D;
-class AnimatedSprite3D;
-class AudioStreamPlayer;
-class AudioStreamPlayer2D;
-class AudioStreamPlayer3D;
-} // namespace godot
-#endif
+// Redundant structs removed. Using definitions from as_utils.h and as_tag_types.h.
 
 /**
  * ASComponent (ASC)
@@ -102,6 +90,14 @@ class ASComponent : public Node {
 	GDCLASS(ASComponent, Node);
 
 public:
+	// Events Historical - Using structs from as_utils.h
+	Vector<ASEventTagHistoricalEntry> _event_history;
+	Vector<ASNameTagHistoricalEntry> _name_history;
+	Vector<ASConditionalTagHistoricalEntry> _cond_history;
+	uint32_t _event_history_max_size = 128;
+	uint32_t _name_history_max_size = 128;
+	uint32_t _cond_history_max_size = 128;
+
 	CharacterBody2D *character_body_2d = nullptr;
 	CharacterBody3D *character_body_3d = nullptr;
 	HashMap<StringName, Node *> registered_nodes;
@@ -118,12 +114,8 @@ public:
 	Ref<ASContainer> container;
 	Ref<ASStateSnapshot> snapshot_state;
 
-	// Cooldown management
-	struct CooldownData {
-		float remaining = 0.0f;
-		TypedArray<StringName> tags;
-	};
-	HashMap<StringName, CooldownData> active_cooldowns;
+	// Cooldown management - Using standard ASCooldownData from as_utils.h
+	HashMap<StringName, ASCooldownData> active_cooldowns;
 
 	// Guard against re-entrant trigger processing (e.g. effect grants tag -> trigger -> activate -> effect -> tag...)
 	bool _handling_triggers = false;
@@ -144,6 +136,8 @@ protected:
 	void _remove_effect_at_index(int p_idx);
 
 public:
+	static ASComponent *get_from_node(Node *p_node);
+
 	// --- Cooldown API ---
 	void start_cooldown(const StringName &p_ability_tag, float p_duration, const TypedArray<StringName> &p_cooldown_tags);
 	bool is_on_cooldown(const StringName &p_ability_tag) const;
@@ -151,24 +145,8 @@ public:
 	void tick(float p_delta);
 	void _handle_ability_triggers(const StringName &p_tag, ASAbility::TriggerType p_type);
 
-	// --- General Initialization & Management ---
-
-	// --- Multiplayer & Prediction ---
-	struct ASEffectState {
-		StringName tag;
-		float remaining_time = 0.0f;
-		float period_timer = 0.0f;
-		int stack_count = 1;
-		float level = 1.0f;
-	};
-
-	struct ASStateCache {
-		uint32_t tick = 0;
-		HashMap<StringName, float> attributes;
-		Vector<StringName> tags;
-		Vector<ASEffectState> active_effects;
-	};
-	Vector<ASStateCache> cache_buffer;
+	// Multiplayer & Prediction - Using dedicated ASStateCache from as_utils.h
+	ASStateCache state_cache;
 	uint32_t current_tick = 0;
 
 	bool _is_server() const;
@@ -180,7 +158,7 @@ public:
 	void request_activate_ability(const StringName &p_tag);
 	void confirm_ability_activation(const StringName &p_tag);
 
-	void apply_container(Ref<ASContainer> p_container, int p_level = 1);
+	void apply_container(Ref<ASContainer> p_container, int p_lvl = 1);
 	void add_attribute_set(Ref<ASAttributeSet> p_set);
 	TypedArray<ASAttributeSet> get_attribute_sets() const;
 
@@ -193,23 +171,23 @@ public:
 
 	// --- Ability Activation API (Transient execution) ---
 	bool can_activate_ability_by_tag(const StringName &p_tag);
-	bool try_activate_ability_by_tag(const StringName &p_tag);
+	bool try_activate_ability_by_tag(const StringName &p_tag, Object *p_target_node = nullptr);
 	void cancel_ability_by_tag(const StringName &p_tag);
 	bool is_ability_active(const StringName &p_tag) const;
 
 	bool can_activate_ability_by_resource(const Ref<ASAbility> &p_ability);
-	bool try_activate_ability_by_resource(const Ref<ASAbility> &p_ability);
+	bool try_activate_ability_by_resource(const Ref<ASAbility> &p_ability, Object *p_target_node = nullptr, uint64_t p_parent_id = 0);
 	void cancel_ability_by_resource(const Ref<ASAbility> &p_ability);
 
 	void cancel_all_abilities();
 
 	// --- Effect Activation API ---
 	bool can_activate_effect_by_tag(const StringName &p_tag);
-	bool try_activate_effect_by_tag(const StringName &p_tag, float p_level = 1.0f, Object *p_target_node = nullptr);
+	bool try_activate_effect_by_tag(const StringName &p_tag, float p_lvl = 1.0f, Object *p_target_node = nullptr);
 	void cancel_effect_by_tag(const StringName &p_tag);
 
 	bool can_activate_effect_by_resource(const Ref<ASEffect> &p_effect);
-	bool try_activate_effect_by_resource(const Ref<ASEffect> &p_effect, float p_level = 1.0f, Object *p_target_node = nullptr);
+	bool try_activate_effect_by_resource(const Ref<ASEffect> &p_effect, float p_lvl = 1.0f, Object *p_target_node = nullptr);
 	void cancel_effect_by_resource(const Ref<ASEffect> &p_effect);
 
 	void remove_effect_by_tag(const StringName &p_tag);
@@ -217,11 +195,11 @@ public:
 	void clear_effects();
 
 	// --- Effect Execution API (Low level) ---
-	void apply_effect_by_tag(const StringName &p_tag, float p_level = 1.0f, Object *p_target_node = nullptr);
-	void apply_effect_by_resource(const Ref<ASEffect> &p_effect, float p_level = 1.0f, Object *p_target_node = nullptr);
-	void apply_package(const Ref<ASPackage> &p_package, float p_level = 1.0f, ASComponent *p_source_component = nullptr);
+	void apply_effect_by_tag(const StringName &p_tag, float p_lvl = 1.0f, Object *p_target_node = nullptr);
+	void apply_effect_by_resource(const Ref<ASEffect> &p_effect, float p_lvl = 1.0f, Object *p_target_node = nullptr);
+	void apply_package(const Ref<ASPackage> &p_package, float p_lvl = 1.0f, ASComponent *p_source_component = nullptr);
 
-	Ref<ASEffectSpec> make_outgoing_spec(Ref<ASEffect> p_effect, float p_level = 1.0f, Object *p_target_node = nullptr);
+	Ref<ASEffectSpec> make_outgoing_spec(Ref<ASEffect> p_effect, float p_lvl = 1.0f, Object *p_target_node = nullptr);
 	void apply_effect_spec_to_self(Ref<ASEffectSpec> p_spec);
 	void apply_effect_spec_to_target(Ref<ASEffectSpec> p_spec, ASComponent *p_target);
 	void remove_active_effect(Ref<ASEffectSpec> p_spec);
@@ -263,6 +241,19 @@ public:
 	void unregister_cue_resource(const StringName &p_tag);
 	Ref<ASCue> get_cue_resource(const StringName &p_tag) const;
 
+	// --- AS Events API ---
+	void dispatch_event(const StringName &p_tag, Node *p_instigator = nullptr, float p_magnitude = 0.0f, const Dictionary &p_custom_payload = Dictionary());
+	bool has_event_occurred(const StringName &p_tag, float p_lookback_sec = 1.0f) const;
+	void clear_event_history();
+
+	// --- AS Tag Historical API ---
+	void clear_tag_history();
+	void clear_name_history();
+	void clear_conditional_history();
+	int get_name_history_size() const { return _name_history.size(); }
+	int get_conditional_history_size() const { return _cond_history.size(); }
+	int get_event_history_size() const { return _event_history.size(); }
+
 	// --- Montage API ---
 	void play_montage(const StringName &p_name, Node *p_target = nullptr);
 	bool is_montage_playing(const StringName &p_name, Node *p_target = nullptr) const;
@@ -300,3 +291,4 @@ public:
 	ASComponent();
 	~ASComponent();
 };
+} // namespace godot

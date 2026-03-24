@@ -1,0 +1,80 @@
+/**************************************************************************/
+/*  as_bridge_condition_has_tag.h                                         */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             GODOT ENGINE                               */
+/*                        https://godotengine.org                         */
+/**************************************************************************/
+/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
+/**
+ * as_bridge_condition_has_tag.h
+ * =============================================================================
+ * BTCondition: Has Tag
+ *
+ * Checks if the agent's ASComponent has a specific tag.
+ * Returns SUCCESS if tag present, FAILURE if not.
+ *
+ * Configuration:
+ * - tag: StringName to check
+ * - exact_match: If false, matches hierarchical (State.Stunned matches State)
+ * - asc_node_path: Optional direct path to ASComponent
+ * =============================================================================
+ */
+
+#ifndef AS_BRIDGE_CONDITION_HAS_TAG_H
+#define AS_BRIDGE_CONDITION_HAS_TAG_H
+
+#include "as_bridge_task.h"
+
+#if AS_BRIDGE_LIMBOAI_AVAILABLE
+
+class BTConditionAS_HasTag : public BTCondition, protected ASBridgeTask {
+	GDCLASS(BTConditionAS_HasTag, BTCondition)
+	TASK_CATEGORY(Ability System)
+
+private:
+	StringName tag;
+	bool exact_match = false;
+	NodePath asc_node_path;
+
+protected:
+	static void _bind_methods();
+
+	virtual BT::Status _tick(double p_delta) override;
+
+public:
+	void set_tag(const StringName &p_tag) { tag = p_tag; }
+	StringName get_tag() const { return tag; }
+
+	void set_exact_match(bool p_exact) { exact_match = p_exact; }
+	bool get_exact_match() const { return exact_match; }
+
+	void set_asc_node_path(const NodePath &p_path) { asc_node_path = p_path; }
+	NodePath get_asc_node_path() const { return asc_node_path; }
+};
+
+#endif // AS_BRIDGE_LIMBOAI_AVAILABLE
+
+#endif // AS_BRIDGE_CONDITION_HAS_TAG_H

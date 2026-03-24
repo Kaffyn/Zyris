@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="BTConditionAS_EventOccurred" inherits="BTCondition" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../doc/class.xsd">
+	<brief_description>
+		BTCondition that checks if an Ability System event occurred recently.
+	</brief_description>
+	<description>
+		A Behavior Tree condition that checks if an [ASEventTag] occurred within a time window using the Events Historical buffer.
+		Returns [constant BT.SUCCESS] if event found, [constant BT.FAILURE] otherwise.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_event_tag">
+			<return type="StringName" />
+			<description>
+				Returns the event tag to check for.
+			</description>
+		</method>
+		<method name="get_time_window">
+			<return type="float" />
+			<description>
+				Returns the time window for event detection (seconds).
+			</description>
+		</method>
+		<method name="set_event_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Sets the event tag to check for.
+			</description>
+		</method>
+		<method name="set_time_window">
+			<return type="void" />
+			<param index="0" name="seconds" type="float" />
+			<description>
+				Sets the time window (how far back to check for the event).
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="event_tag" type="StringName" setter="set_event_tag" getter="get_event_tag" default="&amp;&quot;&amp;quot;" />
+		<member name="time_window" type="float" setter="set_time_window" getter="get_time_window" default="1.0" />
+	</members>
+</class>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASTagUtils" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Utility functions for tag type validation, creation, and historical queries.
+	</brief_description>
+	<description>
+		ASTagUtils provides comprehensive helper functions for working with Ability System tags.
+		Includes type validation, automatic type detection from naming conventions, factory methods,
+		and powerful historical query APIs for all three tag types.
+
+		Features three specialized historical namespaces:
+		- NameHistory: Queries for NAME tags (State.Stunned, Class.Warrior)
+		- ConditionalHistory: Queries for CONDITIONAL tags (Can.Parried, Immune.Fire)
+		- EventHistory: Enhanced queries for EVENT tags (Event.Damage, Event.Ability.Activated)
+		- UnifiedHistory: Cross-type queries and debug utilities
+
+		These utilities follow the BUSINESS_RULES.md conventions for tag naming
+		and help maintain type safety across the system with full historical tracking.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="validate_tag_type" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="expected_type" type="int" enum="ASTagType" />
+			<description>
+				Validates that a tag exists and matches the expected type.
+				Returns false if tag doesn't exist or type doesn't match.
+			</description>
+		</method>
+		<method name="detect_tag_type" qualifiers="static">
+			<return type="int" enum="ASTagType" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Detects tag type from naming convention.
+				Event.* -> EVENT, Can.* or Immune.* -> CONDITIONAL, others -> NAME.
+			</description>
+		</method>
+		<method name="create_tag" qualifiers="static">
+			<return type="ASTagBase" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Creates appropriate tag instance based on naming convention.
+				Returns ASNameTag, ASConditionalTag, or ASEventTagTag as appropriate.
+			</description>
+		</method>
+		<method name="is_state_tag" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if tag name starts with "State.".
+			</description>
+		</method>
+		<method name="is_class_tag" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if tag name starts with "Class.".
+			</description>
+		</method>
+		<method name="is_team_tag" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if tag name starts with "Team.".
+			</description>
+		</method>
+		<method name="is_event_tag" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if tag name starts with "Event.".
+			</description>
+		</method>
+		<method name="is_immune_tag" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if tag name starts with "Immune.".
+			</description>
+		</method>
+		<method name="is_can_tag" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Returns true if tag name starts with "Can.".
+			</description>
+		</method>
+	</methods>
+	<members>
+	</members>
+	<constants>
+	</constants>
+</class>

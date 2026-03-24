@@ -9,15 +9,28 @@
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="_on_calculate_custom_magnitude" qualifiers="virtual const">
-			<return type="float" />
-			<param index="0" name="effect_spec" type="ASEffectSpec" />
-			<param index="1" name="modifier_index" type="int" />
+		<method name="dispatch_event">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="instigator" type="Node" default="null" />
+			<param index="2" name="magnitude" type="float" default="0.0" />
+			<param index="3" name="custom_payload" type="Dictionary" default="{}" />
 			<description>
-				Virtual method for custom calculations.
-				Index -1: Effect Duration.
-				Index -2: Native Ability Cooldown.
-				Index -3 and below: Native Ability Costs.
+				Dispatches a transient [ASEventTag] to this component. The event is broadcast to all listeners and stored in the short-term historical buffer ([method has_event_occurred]). This is the preferred way to signal non-persistent occurrences (e.g. Impact, Hit, Achievement).
+			</description>
+		</method>
+		<method name="has_event_occurred" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="lookback_sec" type="float" default="1.0" />
+			<description>
+				Checks the internal historical buffer for a specific event tag that occurred within the last [param lookback_sec] seconds. Highly efficient for reactive logic and ability requirements.
+			</description>
+		</method>
+		<method name="clear_event_history">
+			<return type="void" />
+			<description>
+				Clears all events from the historical buffer.
 			</description>
 		</method>
 		<method name="add_attribute_set">
@@ -525,15 +538,18 @@
 		<method name="try_activate_ability_by_resource">
 			<return type="bool" />
 			<param index="0" name="ability" type="ASAbility" />
+			<param index="1" name="target_node" type="Object" default="null" />
+			<param index="2" name="parent_id" type="int" default="0" />
 			<description>
-				Attempts to activate the specified ability resource. Requirements are checked against the catalog and unlocked list.
+				Attempts to activate an ability using its resource reference. Supports hierarchical linking via [param parent_id].
 			</description>
 		</method>
 		<method name="try_activate_ability_by_tag">
 			<return type="bool" />
 			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="target_node" type="Object" default="null" />
 			<description>
-				Attempts to activate an ability by its tag.
+				Attempts to activate an ability by its unique tag.
 			</description>
 		</method>
 		<method name="try_activate_cue_by_resource">
@@ -681,14 +697,16 @@
 			<param index="0" name="tag_name" type="StringName" />
 			<param index="1" name="is_present" type="bool" />
 			<description>
-				Emitted when tags are added or removed.
+				Emitted when persistent tags (states) are added or removed.
 			</description>
 		</signal>
-		<signal name="tag_event_received">
-			<param index="0" name="event_tag" type="StringName" />
-			<param index="1" name="data" type="Dictionary" />
+		<signal name="event_received">
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="instigator" type="Node" />
+			<param index="2" name="magnitude" type="float" />
+			<param index="3" name="custom_payload" type="Dictionary" />
 			<description>
-				Emitted when a specific tag event is triggered.
+				Emitted when an [ASEventTag] is dispatched to this component. Used for transient signals.
 			</description>
 		</signal>
 	</signals>

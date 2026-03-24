@@ -38,9 +38,7 @@
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASCueAnimation::execute(Ref<ASCueSpec> p_spec) {
 	ASComponent *asc = p_spec->get_target_asc();
@@ -70,3 +68,4 @@ ASCueAnimation::ASCueAnimation() {
 
 ASCueAnimation::~ASCueAnimation() {
 }
+} // namespace godot

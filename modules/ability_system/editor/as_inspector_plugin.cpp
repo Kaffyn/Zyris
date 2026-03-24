@@ -30,6 +30,7 @@
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include "src/editor/as_inspector_plugin.h"
+#include "src/core/ability_system.h"
 #include "src/editor/as_editor_property.h"
 #include "src/resources/as_ability.h"
 #include "src/resources/as_container.h"
@@ -39,6 +40,7 @@
 #include <godot_cpp/classes/editor_inspector.hpp>
 #else
 #include "editor/inspector/editor_inspector.h"
+#include "modules/ability_system/core/ability_system.h"
 #include "modules/ability_system/editor/as_editor_property.h"
 #include "modules/ability_system/editor/as_inspector_plugin.h"
 #include "modules/ability_system/resources/as_ability.h"
@@ -78,14 +80,33 @@ bool ASInspectorPlugin::_parse_property(Object *p_object, const Variant::Type p_
 		return true;
 	}
 
-	if (p_path.ends_with("_tags")) {
+	if (p_path.ends_with("_tags") || p_path == "events" || p_path.begins_with("events_on_")) {
 		ASEditorPropertySelector *property_editor = memnew(ASEditorPropertySelector);
+		if (p_path == "events" || p_path.begins_with("events_on_")) {
+			property_editor->set_filter_type(ASTagType::EVENT);
+		} else {
+			property_editor->set_filter_type(ASTagType::CONDITIONAL);
+		}
 		add_property_editor(p_path, property_editor);
 		return true;
 	}
 
-	if (p_path.ends_with("_tag") || (p_path.contains("/") && p_path.get_slice("/", 0).ends_with("_tags"))) {
+	// Single-tag selector: distinguish by property path semantics.
+	// - Root `_tag` fields (e.g. ability_tag, cue_tag, effect_tag) -> NAME tags (identity)
+	// - Sub-items inside `_tags` arrays (e.g. activation_required_all_tags/0) -> CONDITIONAL tags (state)
+	// - Event trigger tag fields (e.g. triggers/0/tag) -> EVENT tags
+	if (p_path.ends_with("_tag") || (p_path.contains("/") && (p_path.get_slice("/", 0).ends_with("_tags") || p_path.get_slice("/", 0) == "events" || p_path.get_slice("/", 0).begins_with("events_on_") || p_path.contains("triggers")))) {
 		ASEditorPropertyTagSelector *property_editor = memnew(ASEditorPropertyTagSelector);
+		if (p_path.ends_with("_tag") && !p_path.contains("triggers")) {
+			// Root identity tag: ability_tag, cue_tag, effect_tag -> NAME only
+			property_editor->set_filter_type(ASTagType::NAME);
+		} else if (p_path.contains("events") || p_path.contains("triggers")) {
+			// Event triggers or event list items -> EVENT only
+			property_editor->set_filter_type(ASTagType::EVENT);
+		} else {
+			// Sub-item of a _tags list: activation_required_all_tags/0, granted_tags/0, etc. -> CONDITIONAL only
+			property_editor->set_filter_type(ASTagType::CONDITIONAL);
+		}
 		add_property_editor(p_path, property_editor);
 		return true;
 	}

@@ -36,10 +36,7 @@
 #include "modules/ability_system/resources/as_cue.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
+namespace godot {
 class ASCueAnimation : public ASCue {
 	GDCLASS(ASCueAnimation, ASCue);
 
@@ -59,3 +56,4 @@ public:
 	ASCueAnimation();
 	~ASCueAnimation();
 };
+} // namespace godot

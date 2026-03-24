@@ -40,9 +40,7 @@
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASCue::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_cue_name", "name"), &ASCue::set_cue_name);
@@ -101,7 +99,7 @@ void ASCue::set_cue_name(const String &p_name) {
 void ASCue::set_cue_tag(const StringName &p_tag) {
 	cue_tag = p_tag;
 	if (AbilitySystem::get_singleton()) {
-		AbilitySystem::get_singleton()->register_tag(p_tag, AbilitySystem::TAG_TYPE_NAME, get_instance_id());
+		AbilitySystem::get_singleton()->register_tag(p_tag, (ASTagType)AbilitySystem::TAG_TYPE_NAME, get_instance_id());
 	}
 }
 
@@ -109,7 +107,7 @@ void ASCue::set_activation_required_all_tags(const TypedArray<StringName> &p_tag
 	activation_required_all_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -118,7 +116,7 @@ void ASCue::set_activation_blocked_any_tags(const TypedArray<StringName> &p_tags
 	activation_blocked_any_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -127,7 +125,7 @@ void ASCue::set_activation_required_any_tags(const TypedArray<StringName> &p_tag
 	activation_required_any_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -136,7 +134,7 @@ void ASCue::set_activation_blocked_all_tags(const TypedArray<StringName> &p_tags
 	activation_blocked_all_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -161,3 +159,4 @@ ASCue::ASCue() {
 
 ASCue::~ASCue() {
 }
+} // namespace godot

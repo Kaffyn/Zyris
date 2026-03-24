@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEventTagTag" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Event dispatcher tag for transient system notifications (Event.Damage, Event.Ability.Activated).
+	</brief_description>
+	<description>
+		ASEventTagTag represents event identifiers used with the dispatch system. These are
+		transient signals that flow through the system informing about specific occurrences.
+
+		Events are instant messengers that carry context including instigator, magnitude,
+		and custom payload. They prevent spaghetti code by providing a clean event-driven
+		architecture for combat, ability triggers, and system notifications.
+
+		From BUSINESS_RULES.md: "Represent specific informative occurrences."
+		Events are dispatched via ASComponent.dispatch_event() and can be queried
+		through the Events Historical buffer for temporal reactivity.
+
+		ASEventTagTag provides convenience methods for dispatching events and checking
+		if they occurred recently.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="create" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<param index="0" name="name" type="StringName" />
+			<description>
+				Creates a new ASEventTagTag with the specified name.
+			</description>
+		</method>
+		<method name="dispatch">
+			<return type="void" />
+			<param index="0" name="instigator" type="Node" />
+			<param index="1" name="magnitude" type="float" default="0.0" />
+			<param index="2" name="payload" type="Dictionary" default="{}" />
+			<description>
+				Dispatches this event through the ASComponent system.
+				Automatically finds the ASComponent on the instigator node.
+			</description>
+		</method>
+		<method name="occurred_recently">
+			<return type="bool" />
+			<param index="0" name="target" type="Node" />
+			<param index="1" name="lookback_sec" type="float" default="1.0" />
+			<description>
+				Checks if this event occurred on the target within the specified time window.
+				Queries the Events Historical buffer for temporal reactivity.
+			</description>
+		</method>
+		<method name="DAMAGE_DEALT" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined DAMAGE_DEALT combat event tag.
+			</description>
+		</method>
+		<method name="DAMAGE_TAKEN" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined DAMAGE_TAKEN combat event tag.
+			</description>
+		</method>
+		<method name="DAMAGE_BLOCKED" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined DAMAGE_BLOCKED combat event tag.
+			</description>
+		</method>
+		<method name="HEAL_RECEIVED" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined HEAL_RECEIVED combat event tag.
+			</description>
+		</method>
+		<method name="ABILITY_ACTIVATED" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined ABILITY_ACTIVATED event tag.
+			</description>
+		</method>
+		<method name="ABILITY_FAILED" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined ABILITY_FAILED event tag.
+			</description>
+		</method>
+		<method name="ABILITY_COOLDOWN_END" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined ABILITY_COOLDOWN_END event tag.
+			</description>
+		</method>
+		<method name="ABILITY_INTERRUPTED" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined ABILITY_INTERRUPTED event tag.
+			</description>
+		</method>
+		<method name="STUN_BEGIN" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined STUN_BEGIN state event tag.
+			</description>
+		</method>
+		<method name="STUN_END" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined STUN_END state event tag.
+			</description>
+		</method>
+		<method name="DEATH" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined DEATH event tag.
+			</description>
+		</method>
+		<method name="RESPAWN" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined RESPAWN event tag.
+			</description>
+		</method>
+		<method name="WEAPON_HIT" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined WEAPON_HIT combat event tag.
+			</description>
+		</method>
+		<method name="WEAPON_MISS" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined WEAPON_MISS combat event tag.
+			</description>
+		</method>
+		<method name="WEAPON_CRITICAL" qualifiers="static">
+			<return type="ASEventTagTag" />
+			<description>
+				Returns a predefined WEAPON_CRITICAL combat event tag.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="tag_name" type="StringName" />
+		<member name="tag_type" type="int" enum="ASTagType" />
+	</members>
+	<constants>
+		<constant name="EVENT" value="2" enum="ASTagType">
+			Tag type for event dispatcher tags.
+		</constant>
+	</constants>
+</class>

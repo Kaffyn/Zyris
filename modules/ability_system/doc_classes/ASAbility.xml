@@ -157,7 +157,13 @@
 			The unique tag identifying this ability.
 		</member>
 		<member name="ability_use_custom_duration" type="bool" setter="set_use_custom_duration" getter="get_use_custom_duration" default="false">
-			If true, triggers [method ASComponent._on_calculate_custom_magnitude] with index -1 for duration.
+			If true, triggers custom magnitude calculation for duration.
+		</member>
+		<member name="events_on_activate" type="StringName[]" setter="set_events_on_activate" getter="get_events_on_activate" default="[]">
+			Events dispatched when the ability is successfully activated.
+		</member>
+		<member name="events_on_end" type="StringName[]" setter="set_events_on_end" getter="get_events_on_end" default="[]">
+			Events dispatched when the ability ends (regardless of whether it was canceled or finished naturally).
 		</member>
 		<member name="activation_blocked_all_tags" type="StringName[]" setter="set_activation_blocked_all_tags" getter="get_activation_blocked_all_tags" default="[]">
 			Ability cannot activate if owner has [b]all[/b] of these tags simultaneously (AND logic).
@@ -184,19 +190,28 @@
 			Tags applied during cooldown.
 		</member>
 		<member name="cooldown_use_custom" type="bool" setter="set_use_custom_cooldown" getter="get_use_custom_cooldown" default="false">
-			If true, triggers [method ASComponent._on_calculate_custom_magnitude] with index -2 for duration.
+			If true, triggers custom magnitude calculation for cooldown duration.
 		</member>
 		<member name="costs" type="Dictionary[]" setter="set_costs" getter="get_costs" default="[]">
 			Array of native costs (attribute and amount).
 		</member>
 		<member name="costs_use_custom" type="bool" setter="set_use_custom_costs" getter="get_use_custom_costs" default="false">
-			If true, triggers [method ASComponent._on_calculate_custom_magnitude] with index -3 and below for amounts.
+			If true, triggers custom magnitude calculation for modifier amounts.
 		</member>
 		<member name="cues" type="ASCue[]" setter="set_cues" getter="get_cues" default="[]">
 			Visual/Audio cues triggered on start and end.
 		</member>
 		<member name="effects" type="ASEffect[]" setter="set_effects" getter="get_effects" default="[]">
 			List of effects applied by this ability.
+		</member>
+		<member name="sub_abilities" type="ASAbility[]" setter="set_sub_abilities" getter="get_sub_abilities" default="[]">
+			Hierarchical sub-abilities that are unlocked alongside this parent ability.
+		</member>
+		<member name="sub_abilities_auto_activate" type="StringName[]" setter="set_sub_abilities_auto_activate" getter="get_sub_abilities_auto_activate" default="[]">
+			Tags of sub-abilities that should automatically activate when the parent ability starts.
+		</member>
+		<member name="phases" type="ASAbilityPhase[]" setter="set_phases" getter="get_phases" default="[]">
+			Sequential phases that this ability will execute in order.
 		</member>
 		<member name="requirements" type="Dictionary[]" setter="set_requirements" getter="get_requirements" default="[]">
 			Attribute requirements needed to activate the ability.
@@ -216,8 +231,13 @@
 			Ability remains active until explicitly ended.
 		</constant>
 		<constant name="TRIGGER_ON_TAG_ADDED" value="0" enum="TriggerType">
+			Ability attempts to activate when a specific Tag is added to the owner.
 		</constant>
 		<constant name="TRIGGER_ON_TAG_REMOVED" value="1" enum="TriggerType">
+			Ability attempts to activate when a specific Tag is removed from the owner.
+		</constant>
+		<constant name="TRIGGER_ON_EVENT" value="2" enum="TriggerType">
+			Ability attempts to activate when a specific [ASEventTag] is dispatched to the owner. This is the preferred way for reactive triggers like "Counter-attack on Hit".
 		</constant>
 	</constants>
 </class>

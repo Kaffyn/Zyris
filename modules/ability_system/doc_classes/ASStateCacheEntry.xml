@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASStateCacheEntry" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Lightweight state cache entry for high-performance rollback.
+	</brief_description>
+	<description>
+		ASStateCacheEntry represents a minimal state snapshot for a specific tick.
+		Used internally by ASStateCache for fast state restoration during multiplayer rollback.
+
+		Stores only essential state information: attributes, tags, and active effects.
+		Optimized for memory efficiency and fast serialization/deserialization.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="clear">
+			<return type="void" />
+			<description>
+				Clears all cached state data and resets tick to 0.
+			</description>
+		</method>
+		<method name="is_valid" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns true if this entry contains valid state data (tick > 0).
+			</description>
+		</method>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the cache entry to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads cache entry data from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="tick" type="int" setter="set_tick" getter="get_tick" default="0">
+			The tick number this state entry represents.
+		</member>
+		<member name="attributes" type="HashMap" setter="set_attributes" getter="get_attributes" default="{}">
+			Map of attribute names to their base values at this tick.
+		</member>
+		<member name="tags" type="PackedStringArray" setter="set_tags" getter="get_tags" default="[]">
+			Array of all tags the component had at this tick.
+		</member>
+		<member name="active_effects" type="Array" setter="set_active_effects" getter="get_active_effects" default="[]">
+			Array of ASEffectState objects representing active effects at this tick.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

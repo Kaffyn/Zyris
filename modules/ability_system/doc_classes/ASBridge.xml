@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASBridge" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Integration bridge between Ability System and LimboAI.
+	</brief_description>
+	<description>
+		The [ASBridge] provides seamless integration between Ability System (AS) and LimboAI Behavior Trees / Hierarchical State Machines. It auto-detects LimboAI at runtime and registers custom BT tasks and LimboStates that interact with [ASComponent].
+		This bridge is optional - if LimboAI is not present, the bridge initializes but remains inactive without errors.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_singleton" qualifiers="static">
+			<return type="ASBridge" />
+			<description>
+				Returns the global ASBridge singleton instance.
+			</description>
+		</method>
+		<method name="initialize">
+			<return type="void" />
+			<description>
+				Initializes the bridge, detecting LimboAI and registering all bridge tasks. Called automatically during module initialization. Safe to call multiple times (idempotent).
+			</description>
+		</method>
+		<method name="is_limboai_available" qualifiers="static">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if LimboAI is available in the current engine instance (either as module or GDExtension).
+			</description>
+		</method>
+		<method name="is_limboai_detected">
+			<return type="bool" />
+			<description>
+				Returns [code]true[/code] if LimboAI was detected and bridge tasks were successfully registered.
+			</description>
+		</method>
+		<method name="shutdown">
+			<return type="void" />
+			<description>
+				Shuts down the bridge and unregisters tasks. Called during module termination.
+			</description>
+		</method>
+	</methods>
+</class>

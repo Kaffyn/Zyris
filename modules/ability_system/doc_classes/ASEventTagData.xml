@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEventTagData" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Complete data for event dispatching.
+	</brief_description>
+	<description>
+		ASEventTagData contains all information needed to dispatch and track
+		events in the Ability System. Includes event identification, participants,
+		magnitude values, custom payload data, and timing information.
+
+		Key features:
+		- Event identification through event_tag
+		- Participant tracking (instigator and target)
+		- Magnitude values for quantitative events
+		- Custom payload for flexible data attachment
+		- Timestamp and tick tracking for historical purposes
+		- Node reference helpers for easy access
+
+		Used by ASComponent for event dispatching and by the historical
+		system to track event occurrences for rollback and analysis.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_instigator" qualifiers="const">
+			<return type="Node" />
+			<description>
+				Returns the instigator node, or null if not available.
+			</description>
+		</method>
+		<method name="get_target" qualifiers="const">
+			<return type="Node" />
+			<description>
+				Returns the target node, or null if not available.
+			</description>
+		</method>
+		<method name="set_instigator">
+			<return type="void" />
+			<param index="0" name="node" type="Node" />
+			<description>
+				Sets the instigator node (stores ObjectID internally).
+			</description>
+		</method>
+		<method name="set_target">
+			<return type="void" />
+			<param index="0" name="node" type="Node" />
+			<description>
+				Sets the target node (stores ObjectID internally).
+			</description>
+		</method>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the event data to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads event data from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="event_tag" type="StringName" setter="set_event_tag" getter="get_event_tag" default="&quot;&quot;">
+			The event tag identifying this event type.
+		</member>
+		<member name="instigator_id" type="int" setter="set_instigator_id" getter="get_instigator_id" default="0">
+			ObjectID of the node that triggered this event.
+		</member>
+		<member name="target_id" type="int" setter="set_target_id" getter="get_target_id" default="0">
+			ObjectID of the node that is the target of this event.
+		</member>
+		<member name="magnitude" type="float" setter="set_magnitude" getter="get_magnitude" default="0.0">
+			Magnitude value for quantitative events (damage, healing, etc.).
+		</member>
+		<member name="custom_payload" type="Dictionary" setter="set_custom_payload" getter="get_custom_payload" default="{}">
+			Custom data payload for flexible event-specific information.
+		</member>
+		<member name="timestamp" type="float" setter="set_timestamp" getter="get_timestamp" default="0.0">
+			Timestamp when the event occurred (seconds since start).
+		</member>
+		<member name="tick_id" type="int" setter="set_tick_id" getter="get_tick_id" default="0">
+			Tick ID for multiplayer synchronization and rollback.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="BTActionAS_ActivateAbility" inherits="BTAction" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../doc/class.xsd">
+	<brief_description>
+		BTAction that activates an Ability System ability by tag.
+	</brief_description>
+	<description>
+		A Behavior Tree action that attempts to activate an ability via [ASComponent] using the ability's tag. Returns [constant BT.SUCCESS] if activation succeeds, [constant BT.FAILURE] otherwise.
+		This task respects all ability requirements: tags, cooldowns, costs, and level restrictions.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_ability_tag">
+			<return type="StringName" />
+			<description>
+				Returns the ability tag that will be activated.
+			</description>
+		</method>
+		<method name="get_activation_level">
+			<return type="float" />
+			<description>
+				Returns the activation level for the ability.
+			</description>
+		</method>
+		<method name="get_asc_node_path">
+			<return type="NodePath" />
+			<description>
+				Returns the explicit path to the ASComponent. If empty, auto-resolves from agent.
+			</description>
+		</method>
+		<method name="set_ability_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Sets the ability tag to activate. Must be registered in AbilitySystem.
+			</description>
+		</method>
+		<method name="set_activation_level">
+			<return type="void" />
+			<param index="0" name="level" type="float" />
+			<description>
+				Sets the activation level for the ability (affects magnitude calculations).
+			</description>
+		</method>
+		<method name="set_asc_node_path">
+			<return type="void" />
+			<param index="0" name="path" type="NodePath" />
+			<description>
+				Sets explicit path to ASComponent. If empty, searches agent and its children.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="ability_tag" type="StringName" setter="set_ability_tag" getter="get_ability_tag" default="&amp;&quot;&amp;quot;">
+			The tag of the ability to activate.
+		</member>
+		<member name="activation_level" type="float" setter="set_activation_level" getter="get_activation_level" default="1.0">
+			The level at which to activate the ability.
+		</member>
+		<member name="asc_node_path" type="NodePath" setter="set_asc_node_path" getter="get_asc_node_path" default="NodePath(&amp;quot;&amp;quot;)">
+			Explicit path to ASComponent. Auto-resolved if empty.
+		</member>
+	</members>
+</class>

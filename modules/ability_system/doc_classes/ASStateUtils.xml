@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASStateUtils" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Utility functions for state management and serialization.
+	</brief_description>
+	<description>
+		ASStateUtils provides a comprehensive set of utility functions for working
+		with ASComponentState objects. Includes state comparison, serialization,
+		compression, validation, and debugging capabilities.
+
+		These utilities are designed to support advanced features like:
+		- Network optimization through state diffing and compression
+		- Save/load system integration with binary serialization
+		- Debugging and validation tools for state integrity
+		- State analysis and comparison for testing
+
+		All functions are static and can be called without instantiation.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="compare_states" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="a" type="ASComponentState" />
+			<param index="1" name="b" type="ASComponentState" />
+			<description>
+				Performs deep equality comparison between two component states.
+				Uses the equals() method internally for consistency.
+			</description>
+		</method>
+		<method name="compute_state_difference" qualifiers="static">
+			<return type="float" />
+			<param index="0" name="a" type="ASComponentState" />
+			<param index="1" name="b" type="ASComponentState" />
+			<description>
+				Computes a numerical difference score between two states.
+				Higher values indicate greater differences. Useful for state change detection.
+			</description>
+		</method>
+		<method name="serialize_state" qualifiers="static">
+			<return type="PackedByteArray" />
+			<param index="0" name="state" type="ASComponentState" />
+			<description>
+				Serializes a component state to compact binary format.
+				Optimized for network transmission and file storage.
+			</description>
+		</method>
+		<method name="deserialize_state" qualifiers="static">
+			<return type="ASComponentState" />
+			<param index="0" name="data" type="PackedByteArray" />
+			<description>
+				Deserializes a component state from binary data created by serialize_state().
+				Returns empty state if data is invalid.
+			</description>
+		</method>
+		<method name="compress_state" qualifiers="static">
+			<return type="PackedByteArray" />
+			<param index="0" name="state" type="ASComponentState" />
+			<description>
+				Compresses a component state using compression algorithms.
+				Significantly reduces data size for network bandwidth optimization.
+			</description>
+		</method>
+		<method name="decompress_state" qualifiers="static">
+			<return type="ASComponentState" />
+			<param index="0" name="data" type="PackedByteArray" />
+			<description>
+				Decompresses state data created by compress_state().
+				Returns original state object.
+			</description>
+		</method>
+		<method name="validate_state" qualifiers="static">
+			<return type="bool" />
+			<param index="0" name="state" type="ASComponentState" />
+			<description>
+				Validates the integrity and consistency of a component state.
+				Checks for invalid data, corrupted values, and logical inconsistencies.
+			</description>
+		</method>
+		<method name="get_validation_errors" qualifiers="static">
+			<return type="Array" />
+			<param index="0" name="state" type="ASComponentState" />
+			<description>
+				Returns an array of validation error messages for a component state.
+				Empty array indicates no validation errors found.
+			</description>
+		</method>
+		<method name="dump_state" qualifiers="static">
+			<return type="void" />
+			<param index="0" name="state" type="ASComponentState" />
+			<description>
+				Prints detailed state information to the console for debugging.
+				Shows all data including historical buffers and statistics.
+			</description>
+		</method>
+		<method name="state_to_string" qualifiers="static">
+			<return type="String" />
+			<param index="0" name="state" type="ASComponentState" />
+			<description>
+				Returns a compact string representation of the state.
+				Useful for logging and quick state identification.
+			</description>
+		</method>
+	</methods>
+	<members>
+	</members>
+	<constants>
+	</constants>
+</class>

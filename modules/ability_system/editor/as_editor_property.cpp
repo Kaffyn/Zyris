@@ -87,18 +87,20 @@ void ASEditorPropertySelector::_update_tree() {
 		}
 	};
 
-	TreeItem *name_root = tags_tree->create_item(root);
-	name_root->set_text(0, "Name Tags");
-	name_root->set_selectable(0, false);
-	name_root->set_custom_bg_color(0, Color(1, 1, 1, 0.05));
+	// Predicate lists (required/blocked) only accept CONDITIONAL tags.
+	// Event lists only accept EVENT tags.
+	TreeItem *group_root = tags_tree->create_item(root);
+	if (filter_type == ASTagType::EVENT) {
+		group_root->set_text(0, "Event Tags (Communication)");
+	} else if (filter_type == ASTagType::NAME) {
+		group_root->set_text(0, "Name Tags (Identity)");
+	} else {
+		group_root->set_text(0, "Conditional Tags (State)");
+	}
+	group_root->set_selectable(0, false);
+	group_root->set_custom_bg_color(0, Color(1, 1, 1, 0.05));
 
-	TreeItem *cond_root = tags_tree->create_item(root);
-	cond_root->set_text(0, "Conditional Tags");
-	cond_root->set_selectable(0, false);
-	cond_root->set_custom_bg_color(0, Color(1, 1, 1, 0.05));
-
-	create_items(name_root, "", as->get_registered_tags_of_type(AbilitySystem::TAG_TYPE_NAME), filter);
-	create_items(cond_root, "", as->get_registered_tags_of_type(AbilitySystem::TAG_TYPE_CONDITIONAL), filter);
+	create_items(group_root, "", as->get_registered_tags_of_type(filter_type), filter);
 
 	updating = false;
 }
@@ -292,15 +294,18 @@ void ASEditorPropertyTagSelector::_update_property() {
 
 	AbilitySystem *as = AbilitySystem::get_singleton();
 	if (as) {
-		TypedArray<StringName> tags = as->get_registered_tags();
+		// Only show tags of the type configured by the InspectorPlugin.
+		// NAME     -> identity/naming selectors (ability_tag, cue_tag, effect_tag)
+		// CONDITIONAL -> state predicate selectors (items inside _tags arrays)
+		// EVENT    -> event trigger selectors (trigger tag in TRIGGER_ON_EVENT)
+		TypedArray<StringName> tags = as->get_registered_tags_of_type(filter_type);
 		int selected_index = 0;
 
 		for (int i = 0; i < tags.size(); i++) {
 			String tag = tags[i];
 			options->add_item(tag);
-
 			if (tag == current_tag) {
-				selected_index = i + 1; // +1 because of "(None)" at index 0
+				selected_index = options->get_item_count() - 1;
 			}
 		}
 

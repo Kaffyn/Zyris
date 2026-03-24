@@ -40,10 +40,7 @@
 #include "core/variant/typed_array.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-
+namespace godot {
 class ASTagSpec : public RefCounted {
 	GDCLASS(ASTagSpec, RefCounted);
 
@@ -66,3 +63,4 @@ public:
 	ASTagSpec();
 	~ASTagSpec();
 };
+} // namespace godot

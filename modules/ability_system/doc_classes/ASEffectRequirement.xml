@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEffectRequirement" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Attribute requirement for effect activation.
+	</brief_description>
+	<description>
+		ASEffectRequirement defines conditions that must be met for an effect
+		to activate or apply. Typically used for attribute-based requirements
+		like minimum health levels, resource thresholds, or stat checks.
+
+		Used by ASEffect to specify activation conditions and by the effect
+		system to validate whether requirements are satisfied before applying
+		effects to targets.
+
+		Requirements are evaluated during effect activation and can be combined
+		with tag-based requirements for complex activation logic.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the requirement to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads requirement data from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="attribute" type="StringName" setter="set_attribute" getter="get_attribute" default="&quot;&quot;">
+			The name of the attribute to check for this requirement.
+		</member>
+		<member name="amount" type="float" setter="set_amount" getter="get_amount" default="0.0">
+			The required amount/threshold value for the attribute.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

@@ -50,6 +50,7 @@
 #include "modules/ability_system/core/as_effect_spec.h"
 #include "modules/ability_system/core/as_tag_spec.h"
 #include "modules/ability_system/resources/as_ability.h"
+#include "modules/ability_system/resources/as_ability_phase.h"
 #include "modules/ability_system/resources/as_attribute.h"
 #include "modules/ability_system/resources/as_attribute_set.h"
 #include "modules/ability_system/resources/as_container.h"
@@ -73,6 +74,7 @@
 #include <godot_cpp/classes/multiplayer_api.hpp>
 #include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/sprite3d.hpp>
+#include <godot_cpp/classes/time.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #else
 #include "core/config/project_settings.h"
@@ -84,13 +86,27 @@
 #include "scene/3d/sprite_3d.h"
 #include "scene/animation/animation_player.h"
 #include "scene/audio/audio_stream_player.h"
-#include "scene/main/multiplayer_api.h"
+#scene / main / multiplayer_api.h "
 #include "servers/audio/audio_stream.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
+
+ASComponent *ASComponent::get_from_node(Node *p_node) {
+	if (!p_node) {
+		return nullptr;
+	}
+	if (ASComponent *asc = Object::cast_to<ASComponent>(p_node)) {
+		return asc;
+	}
+	// Look for a child component
+	for (int i = 0; i < p_node->get_child_count(); i++) {
+		if (ASComponent *asc = Object::cast_to<ASComponent>(p_node->get_child(i))) {
+			return asc;
+		}
+	}
+	return nullptr;
+}
 
 // Methods implementation
 
@@ -117,7 +133,7 @@ void ASComponent::_bind_methods() {
 
 	// --- Ability Activation API (By Tag) ---
 	ClassDB::bind_method(D_METHOD("can_activate_ability_by_tag", "tag"), &ASComponent::can_activate_ability_by_tag);
-	ClassDB::bind_method(D_METHOD("try_activate_ability_by_tag", "tag"), &ASComponent::try_activate_ability_by_tag);
+	ClassDB::bind_method(D_METHOD("try_activate_ability_by_tag", "tag", "target_node"), &ASComponent::try_activate_ability_by_tag, DEFVAL(Variant()));
 	ClassDB::bind_method(D_METHOD("cancel_ability_by_tag", "tag"), &ASComponent::cancel_ability_by_tag);
 	ClassDB::bind_method(D_METHOD("is_ability_active", "tag"), &ASComponent::is_ability_active);
 
@@ -163,6 +179,8 @@ void ASComponent::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_attribute_base_value_by_resource", "attribute"), &ASComponent::get_attribute_base_value_by_resource);
 	ClassDB::bind_method(D_METHOD("set_attribute_base_value_by_resource", "attribute", "value"), &ASComponent::set_attribute_base_value_by_resource);
 	ClassDB::bind_method(D_METHOD("has_attribute_by_resource", "attribute"), &ASComponent::has_attribute_by_resource);
+
+	ClassDB::bind_static_method(get_class_static(), D_METHOD("get_from_node", "node"), &ASComponent::get_from_node);
 
 	// --- Cooldown API ---
 	ClassDB::bind_method(D_METHOD("start_cooldown", "ability_tag", "duration", "tags"), &ASComponent::start_cooldown);
@@ -242,6 +260,21 @@ void ASComponent::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("tag_event_received", PropertyInfo(Variant::STRING_NAME, "event_tag"), PropertyInfo(Variant::DICTIONARY, "data")));
 	ADD_SIGNAL(MethodInfo("cooldown_started", PropertyInfo(Variant::STRING_NAME, "ability_tag"), PropertyInfo(Variant::FLOAT, "duration")));
 	ADD_SIGNAL(MethodInfo("cooldown_ended", PropertyInfo(Variant::STRING_NAME, "ability_tag")));
+
+	// --- AS Events ---
+	ClassDB::bind_method(D_METHOD("dispatch_event", "tag", "instigator", "magnitude", "custom_payload"), &ASComponent::dispatch_event, DEFVAL(Variant()), DEFVAL(0.0f), DEFVAL(Dictionary()));
+	ClassDB::bind_method(D_METHOD("has_event_occurred", "tag", "lookback_sec"), &ASComponent::has_event_occurred, DEFVAL(1.0f));
+	ClassDB::bind_method(D_METHOD("clear_event_history"), &ASComponent::clear_event_history);
+
+	// --- AS Tag Historical ---
+	ClassDB::bind_method(D_METHOD("clear_tag_history"), &ASComponent::clear_tag_history);
+	ClassDB::bind_method(D_METHOD("clear_name_history"), &ASComponent::clear_name_history);
+	ClassDB::bind_method(D_METHOD("clear_conditional_history"), &ASComponent::clear_conditional_history);
+	ClassDB::bind_method(D_METHOD("get_name_history_size"), &ASComponent::get_name_history_size);
+	ClassDB::bind_method(D_METHOD("get_conditional_history_size"), &ASComponent::get_conditional_history_size);
+	ClassDB::bind_method(D_METHOD("get_event_history_size"), &ASComponent::get_event_history_size);
+
+	ADD_SIGNAL(MethodInfo("event_received", PropertyInfo(Variant::STRING_NAME, "tag"), PropertyInfo(Variant::OBJECT, "instigator", PROPERTY_HINT_NODE_TYPE, "Node"), PropertyInfo(Variant::FLOAT, "magnitude"), PropertyInfo(Variant::DICTIONARY, "custom_payload")));
 }
 
 void ASComponent::_notification(int p_what) {
@@ -289,7 +322,7 @@ void ASComponent::_process_cooldowns(float p_delta) {
 
 	// Safe iteration: copy keys first to avoid iterator invalidation during re-entrant calls
 	Vector<StringName> keys;
-	for (const KeyValue<StringName, CooldownData> &E : active_cooldowns) {
+	for (const KeyValue<StringName, ASCooldownData> &E : active_cooldowns) {
 		keys.push_back(E.key);
 	}
 
@@ -300,10 +333,10 @@ void ASComponent::_process_cooldowns(float p_delta) {
 			continue;
 		}
 
-		CooldownData &cd = active_cooldowns[key];
-		cd.remaining -= p_delta;
+		ASCooldownData &cd = active_cooldowns[key];
+		cd.update(p_delta);
 
-		if (cd.remaining <= 0) {
+		if (cd.is_expired()) {
 			// Cleanup tags - this might trigger re-entrant calls!
 			for (int j = 0; j < cd.tags.size(); j++) {
 				remove_tag(cd.tags[j]);
@@ -323,7 +356,7 @@ void ASComponent::start_cooldown(const StringName &p_ability_tag, float p_durati
 		return;
 	}
 
-	CooldownData cd;
+	ASCooldownData cd;
 	cd.remaining = p_duration;
 	cd.tags = p_cooldown_tags;
 	active_cooldowns[p_ability_tag] = cd;
@@ -365,6 +398,47 @@ void ASComponent::add_tag(const StringName &p_tag) {
 	}
 	if (owned_tags.is_valid()) {
 		if (owned_tags->add_tag(p_tag)) {
+			// Register in appropriate history
+			ASTagType tag_type = ASTagUtils::detect_tag_type(p_tag);
+			double current_time;
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+			current_time = (double)Time::get_singleton()->get_ticks_msec() / 1000.0;
+#else
+			current_time = (double)OS::get_singleton()->get_ticks_msec() / 1000.0;
+#endif
+
+			switch (tag_type) {
+				case ASTagType::NAME: {
+					ASNameTagHistoricalEntry entry;
+					entry.tag_name = p_tag;
+					entry.set_target(this);
+					entry.timestamp = current_time;
+					entry.tick_id = current_tick;
+					entry.added = true;
+					_name_history.push_back(entry);
+					if (_name_history.size() > _name_history_max_size) {
+						_name_history.remove_at(0);
+					}
+					break;
+				}
+				case ASTagType::CONDITIONAL: {
+					ASConditionalTagHistoricalEntry entry;
+					entry.tag_name = p_tag;
+					entry.set_target(this);
+					entry.timestamp = current_time;
+					entry.tick_id = current_tick;
+					entry.added = true;
+					_cond_history.push_back(entry);
+					if (_cond_history.size() > _cond_history_max_size) {
+						_cond_history.remove_at(0);
+					}
+					break;
+				}
+				case ASTagType::EVENT:
+					// Events are handled by dispatch_event, not add_tag
+					break;
+			}
+
 			_handle_ability_triggers(p_tag, ASAbility::TRIGGER_ON_TAG_ADDED);
 			emit_signal("tag_changed", p_tag, true);
 		}
@@ -377,6 +451,47 @@ void ASComponent::remove_tag(const StringName &p_tag) {
 	}
 	if (owned_tags.is_valid()) {
 		if (owned_tags->remove_tag(p_tag)) {
+			// Register in appropriate history
+			ASTagType tag_type = ASTagUtils::detect_tag_type(p_tag);
+			double current_time;
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+			current_time = (double)Time::get_singleton()->get_ticks_msec() / 1000.0;
+#else
+			current_time = (double)OS::get_singleton()->get_ticks_msec() / 1000.0;
+#endif
+
+			switch (tag_type) {
+				case ASTagType::NAME: {
+					ASNameTagHistoricalEntry entry;
+					entry.tag_name = p_tag;
+					entry.set_target(this);
+					entry.timestamp = current_time;
+					entry.tick_id = current_tick;
+					entry.added = false; // Removed
+					_name_history.push_back(entry);
+					if (_name_history.size() > _name_history_max_size) {
+						_name_history.remove_at(0);
+					}
+					break;
+				}
+				case ASTagType::CONDITIONAL: {
+					ASConditionalTagHistoricalEntry entry;
+					entry.tag_name = p_tag;
+					entry.set_target(this);
+					entry.timestamp = current_time;
+					entry.tick_id = current_tick;
+					entry.added = false; // Removed
+					_cond_history.push_back(entry);
+					if (_cond_history.size() > _cond_history_max_size) {
+						_cond_history.remove_at(0);
+					}
+					break;
+				}
+				case ASTagType::EVENT:
+					// Events are handled by dispatch_event, not remove_tag
+					break;
+			}
+
 			_handle_ability_triggers(p_tag, ASAbility::TRIGGER_ON_TAG_REMOVED);
 			emit_signal("tag_changed", p_tag, false);
 		}
@@ -535,6 +650,68 @@ void ASComponent::_process_abilities(float p_delta) {
 			}
 
 			emit_signal("ability_ended", spec, false);
+
+			// Phase Transition logic: if this was a phase, try starting the next one.
+			ObjectID parent_id = spec->get_parent_id();
+			if (parent_id.is_valid()) {
+				// Clean up this spec from parent's sub-specs first
+				Object *p_obj = ObjectDB::get_instance(parent_id);
+				ASAbilitySpec *p_spec = Object::cast_to<ASAbilitySpec>(p_obj);
+				if (p_spec) {
+					p_spec->remove_sub_spec(spec);
+				}
+
+				bool phase_started = true;
+				ObjectID current_sub_id = ObjectID(spec->get_instance_id());
+
+				// Loop to handle multiple sequential instant phases in the same frame
+				while (phase_started) {
+					phase_started = false;
+					Object *parent_obj = ObjectDB::get_instance(parent_id);
+					ASAbilitySpec *parent_spec = Object::cast_to<ASAbilitySpec>(parent_obj);
+
+					if (parent_spec && parent_spec->get_is_active()) {
+						Ref<ASAbility> parent_ability = parent_spec->get_ability();
+						TypedArray<ASAbility> phases = parent_ability->get_phases();
+						int next_phase_idx = parent_spec->get_current_phase_index() + 1;
+
+						if (next_phase_idx > 0 && next_phase_idx < phases.size()) {
+							Ref<ASAbility> next_phase = phases[next_phase_idx];
+							if (next_phase.is_valid()) {
+								parent_spec->set_current_phase_index(next_phase_idx);
+								Ref<ASAbilitySpec> next_spec;
+								next_spec.instantiate();
+								next_spec->init(next_phase, parent_spec->get_level());
+								next_spec->set_owner(this);
+								next_spec->set_parent_id(ObjectID(parent_id));
+
+								if (next_phase->can_activate_ability(this, next_spec)) {
+									// Mark as sub-spec
+									parent_spec->add_sub_spec(next_spec);
+									next_phase->activate_ability(this, next_spec, nullptr);
+									emit_signal("ability_activated", next_spec);
+
+									// If instant, we might need another phase
+									if (next_phase->get_duration_policy() == ASAbility::POLICY_INSTANT) {
+										next_phase->end_ability(this, next_spec);
+										next_spec->set_is_active(false);
+										emit_signal("ability_ended", next_spec, false);
+										parent_spec->remove_sub_spec(next_spec);
+										// Continue loop to check for another phase
+										phase_started = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// Emit events on end
+			TypedArray<StringName> end_events = ability->get_events_on_end();
+			for (int j = 0; j < end_events.size(); j++) {
+				dispatch_event(end_events[j]);
+			}
 		}
 	}
 }
@@ -584,6 +761,12 @@ void ASComponent::_remove_effect_at_index(int p_idx) {
 
 	active_effects.remove_at(p_idx);
 	emit_signal("effect_removed", spec);
+
+	// Emit events on remove
+	TypedArray<StringName> remove_events = effect->get_events_on_remove();
+	for (int i = 0; i < remove_events.size(); i++) {
+		dispatch_event(remove_events[i], spec->get_source_component(), spec->get_level());
+	}
 
 	// Recalculate if duration/infinite
 	if (effect->get_duration_policy() != ASEffect::POLICY_INSTANT) {
@@ -669,7 +852,7 @@ void ASComponent::cancel_all_abilities() {
 	active_abilities.clear();
 }
 
-void ASComponent::apply_container(Ref<ASContainer> p_container, int p_level) {
+void ASComponent::apply_container(Ref<ASContainer> p_container, int p_lvl) {
 	ERR_FAIL_COND(p_container.is_null());
 
 	// 1. Duplicate container (shallow) to allow local modifications without affecting the resource file
@@ -699,7 +882,7 @@ void ASComponent::apply_container(Ref<ASContainer> p_container, int p_level) {
 	for (int i = 0; i < effects.size(); i++) {
 		Ref<ASEffect> effect = effects[i];
 		if (effect.is_valid()) {
-			Ref<ASEffectSpec> spec = make_outgoing_spec(effect, (float)p_level);
+			Ref<ASEffectSpec> spec = make_outgoing_spec(effect, (float)p_lvl);
 			apply_effect_spec_to_self(spec);
 		}
 	}
@@ -743,6 +926,23 @@ void ASComponent::unlock_ability_by_resource(const Ref<ASAbility> &p_ability) {
 	spec->init(p_ability);
 	spec->set_owner(this);
 	unlocked_abilities.push_back(spec);
+
+	// Recursively unlock sub-abilities and phases
+	TypedArray<ASAbility> subs = p_ability->get_sub_abilities();
+	for (int i = 0; i < subs.size(); i++) {
+		Ref<ASAbility> sub = subs[i];
+		if (sub.is_valid()) {
+			unlock_ability_by_resource(sub);
+		}
+	}
+
+	TypedArray<ASAbility> phases = p_ability->get_phases();
+	for (int i = 0; i < phases.size(); i++) {
+		Ref<ASAbility> phase = phases[i];
+		if (phase.is_valid()) {
+			unlock_ability_by_resource(phase);
+		}
+	}
 }
 
 void ASComponent::unlock_ability_by_tag(const StringName &p_tag) {
@@ -848,7 +1048,7 @@ bool ASComponent::can_activate_ability_by_tag(const StringName &p_tag) {
 	return false;
 }
 
-bool ASComponent::try_activate_ability_by_tag(const StringName &p_tag) {
+bool ASComponent::try_activate_ability_by_tag(const StringName &p_tag, Object *p_target_node) {
 	bool authority = is_multiplayer_authority();
 	if (!authority) {
 		_is_predicting = true;
@@ -883,6 +1083,13 @@ bool ASComponent::try_activate_ability_by_tag(const StringName &p_tag) {
 							emit_signal("ability_ended", spec, false);
 						}
 						emit_signal("ability_activated", spec);
+
+						// Emit events on activate
+						TypedArray<StringName> activate_events = ability->get_events_on_activate();
+						for (int j = 0; j < activate_events.size(); j++) {
+							dispatch_event(activate_events[j]);
+						}
+
 						success = true;
 						break;
 					}
@@ -927,7 +1134,7 @@ bool ASComponent::can_activate_ability_by_resource(const Ref<ASAbility> &p_abili
 	return p_ability->can_activate_ability(this, temp_spec);
 }
 
-bool ASComponent::try_activate_ability_by_resource(const Ref<ASAbility> &p_ability) {
+bool ASComponent::try_activate_ability_by_resource(const Ref<ASAbility> &p_ability, Object *p_target_node, uint64_t p_parent_id) {
 	ERR_FAIL_COND_V(p_ability.is_null(), false);
 
 	bool authority = is_multiplayer_authority();
@@ -938,11 +1145,22 @@ bool ASComponent::try_activate_ability_by_resource(const Ref<ASAbility> &p_abili
 	bool success = false;
 	if (is_ability_unlocked(p_ability->get_ability_tag())) {
 		Ref<ASAbilitySpec> spec;
-		spec.instantiate();
-		spec->init(p_ability);
-		spec->set_owner(this);
+		// Find the actual spec in unlocked_abilities
+		for (int i = 0; i < unlocked_abilities.size(); i++) {
+			if (unlocked_abilities[i]->get_ability() == p_ability) {
+				spec = unlocked_abilities[i];
+				break;
+			}
+		}
 
-		if (p_ability->can_activate_ability(this, spec)) {
+		if (spec.is_null() || spec->get_is_active()) {
+			if (!authority) {
+				_is_predicting = false;
+			}
+			return false;
+		}
+
+		if (can_activate_ability_by_resource(p_ability)) {
 			// Cancel abilities by tag as requested by the activating ability
 			TypedArray<StringName> cancel_tags = p_ability->get_activation_cancel_tags();
 			for (int j = 0; j < cancel_tags.size(); j++) {
@@ -950,7 +1168,48 @@ bool ASComponent::try_activate_ability_by_resource(const Ref<ASAbility> &p_abili
 			}
 
 			spec->set_is_active(true);
-			p_ability->activate_ability(this, spec);
+			spec->set_parent_id(ObjectID(p_parent_id));
+
+			if (p_parent_id != 0) {
+				Object *p_obj = ObjectDB::get_instance(ObjectID(p_parent_id));
+				ASAbilitySpec *p_spec = Object::cast_to<ASAbilitySpec>(p_obj);
+				if (p_spec) {
+					p_spec->add_sub_spec(spec);
+				}
+			}
+
+			// Phases support: start the first phase if any
+			TypedArray<ASAbility> phases = p_ability->get_phases();
+			if (!phases.is_empty()) {
+				Ref<ASAbility> first_phase = phases[0];
+				if (first_phase.is_valid()) {
+					spec->set_current_phase_index(0);
+					Ref<ASAbilitySpec> phase_spec;
+					phase_spec.instantiate();
+					phase_spec->init(first_phase, spec->get_level());
+					phase_spec->set_owner(this);
+					phase_spec->set_parent_id(ObjectID(spec->get_instance_id()));
+					spec->add_sub_spec(phase_spec);
+
+					if (first_phase->can_activate_ability(this, phase_spec)) {
+						phase_spec->set_is_active(true);
+						first_phase->activate_ability(this, phase_spec, p_target_node);
+						emit_signal("ability_activated", phase_spec);
+
+						if (first_phase->get_duration_policy() != ASAbility::POLICY_INSTANT) {
+							active_abilities.push_back(phase_spec);
+						} else {
+							first_phase->end_ability(this, phase_spec);
+							phase_spec->set_is_active(false);
+							emit_signal("ability_ended", phase_spec, false);
+							spec->remove_sub_spec(phase_spec);
+						}
+					}
+				}
+			}
+
+			p_ability->activate_ability(this, spec, p_target_node);
+			emit_signal("ability_activated", spec);
 
 			if (p_ability->get_duration_policy() != ASAbility::POLICY_INSTANT) {
 				active_abilities.push_back(spec);
@@ -959,7 +1218,27 @@ bool ASComponent::try_activate_ability_by_resource(const Ref<ASAbility> &p_abili
 				spec->set_is_active(false);
 				emit_signal("ability_ended", spec, false);
 			}
-			emit_signal("ability_activated", spec);
+
+			// Emit events on activate
+			TypedArray<StringName> activate_events = p_ability->get_events_on_activate();
+			for (int j = 0; j < activate_events.size(); j++) {
+				dispatch_event(activate_events[j]);
+			}
+
+			// Handle Auto-activate sub-abilities
+			TypedArray<StringName> auto_subs = p_ability->get_sub_abilities_auto_activate();
+			TypedArray<ASAbility> sub_list = p_ability->get_sub_abilities();
+			for (int i = 0; i < auto_subs.size(); i++) {
+				StringName target_tag = auto_subs[i];
+				for (int j = 0; j < sub_list.size(); j++) {
+					Ref<ASAbility> sub = sub_list[j];
+					if (sub.is_valid() && sub->get_ability_tag() == target_tag) {
+						try_activate_ability_by_resource(sub, p_target_node, spec->get_instance_id());
+						break;
+					}
+				}
+			}
+
 			success = true;
 		}
 	}
@@ -975,6 +1254,15 @@ void ASComponent::cancel_ability_by_resource(const Ref<ASAbility> &p_ability) {
 	for (int i = active_abilities.size() - 1; i >= 0; i--) {
 		Ref<ASAbilitySpec> spec = active_abilities[i];
 		if (spec->get_ability() == p_ability) {
+			// Cascade cancel sub-specs
+			TypedArray<ASAbilitySpec> subs = spec->get_sub_specs();
+			for (int j = 0; j < subs.size(); j++) {
+				Ref<ASAbilitySpec> sub = subs[j];
+				if (sub.is_valid()) {
+					cancel_ability_by_resource(sub->get_ability());
+				}
+			}
+
 			p_ability->end_ability(this, spec);
 			spec->set_is_active(false);
 			active_abilities.remove_at(i);
@@ -1040,17 +1328,17 @@ bool ASComponent::can_activate_effect_by_tag(const StringName &p_tag) {
 	return false;
 }
 
-bool ASComponent::try_activate_effect_by_resource(const Ref<ASEffect> &p_effect, float p_level, Object *p_target_node) {
+bool ASComponent::try_activate_effect_by_resource(const Ref<ASEffect> &p_effect, float p_lvl, Object *p_target_node) {
 	if (can_activate_effect_by_resource(p_effect)) {
-		apply_effect_by_resource(p_effect, p_level, p_target_node);
+		apply_effect_by_resource(p_effect, p_lvl, p_target_node);
 		return true;
 	}
 	return false;
 }
 
-bool ASComponent::try_activate_effect_by_tag(const StringName &p_tag, float p_level, Object *p_target_node) {
+bool ASComponent::try_activate_effect_by_tag(const StringName &p_tag, float p_lvl, Object *p_target_node) {
 	if (can_activate_effect_by_tag(p_tag)) {
-		apply_effect_by_tag(p_tag, p_level, p_target_node);
+		apply_effect_by_tag(p_tag, p_lvl, p_target_node);
 		return true;
 	}
 	return false;
@@ -1066,21 +1354,21 @@ void ASComponent::cancel_effect_by_resource(const Ref<ASEffect> &p_effect) {
 
 // --- Effect Execution API (Low level) ---
 
-void ASComponent::apply_effect_by_tag(const StringName &p_tag, float p_level, Object *p_target_node) {
+void ASComponent::apply_effect_by_tag(const StringName &p_tag, float p_lvl, Object *p_target_node) {
 	Ref<ASEffect> effect = find_effect_by_tag(p_tag);
 	if (effect.is_valid()) {
-		apply_effect_by_resource(effect, p_level, p_target_node);
+		apply_effect_by_resource(effect, p_lvl, p_target_node);
 	} else {
 		ERR_PRINT(vformat("ASComponent: apply_effect_by_tag failed - Effect tag '%s' not found in container or unlocked abilities.", p_tag));
 	}
 }
 
-void ASComponent::apply_effect_by_resource(const Ref<ASEffect> &p_effect, float p_level, Object *p_target_node) {
-	Ref<ASEffectSpec> spec = make_outgoing_spec(p_effect, p_level, p_target_node);
+void ASComponent::apply_effect_by_resource(const Ref<ASEffect> &p_effect, float p_lvl, Object *p_target_node) {
+	Ref<ASEffectSpec> spec = make_outgoing_spec(p_effect, p_lvl, p_target_node);
 	apply_effect_spec_to_self(spec);
 }
 
-void ASComponent::apply_package(const Ref<ASPackage> &p_package, float p_level, ASComponent *p_source_component) {
+void ASComponent::apply_package(const Ref<ASPackage> &p_package, float p_lvl, ASComponent *p_source_component) {
 	ERR_FAIL_COND(p_package.is_null());
 
 	// 1. Deliver effect resources
@@ -1090,10 +1378,10 @@ void ASComponent::apply_package(const Ref<ASPackage> &p_package, float p_level, 
 		if (effect.is_valid()) {
 			Ref<ASEffectSpec> spec;
 			if (p_source_component) {
-				spec = p_source_component->make_outgoing_spec(effect, p_level);
+				spec = p_source_component->make_outgoing_spec(effect, p_lvl);
 			} else {
 				spec.instantiate();
-				spec->init(effect, p_level);
+				spec->init(effect, p_lvl);
 			}
 			apply_effect_spec_to_self(spec);
 		}
@@ -1110,14 +1398,14 @@ void ASComponent::apply_package(const Ref<ASPackage> &p_package, float p_level, 
 				for (int j = 0; j < source_effects.size(); j++) {
 					Ref<ASEffect> e = source_effects[j];
 					if (e.is_valid() && e->get_effect_tag() == tag) {
-						Ref<ASEffectSpec> spec = p_source_component->make_outgoing_spec(e, p_level);
+						Ref<ASEffectSpec> spec = p_source_component->make_outgoing_spec(e, p_lvl);
 						apply_effect_spec_to_self(spec);
 						break;
 					}
 				}
 			}
 		} else {
-			apply_effect_by_tag(tag, p_level);
+			apply_effect_by_tag(tag, p_lvl);
 		}
 	}
 
@@ -1127,7 +1415,7 @@ void ASComponent::apply_package(const Ref<ASPackage> &p_package, float p_level, 
 		Ref<ASCue> cue = cues[i];
 		if (cue.is_valid()) {
 			Dictionary cue_data;
-			cue_data["level"] = p_level;
+			cue_data["level"] = p_lvl;
 			try_activate_cue_by_resource(cue, cue_data, nullptr);
 		}
 	}
@@ -1137,8 +1425,14 @@ void ASComponent::apply_package(const Ref<ASPackage> &p_package, float p_level, 
 	for (int i = 0; i < cue_tags.size(); i++) {
 		StringName tag = cue_tags[i];
 		Dictionary cue_tag_data;
-		cue_tag_data["level"] = p_level;
+		cue_tag_data["level"] = p_lvl;
 		try_activate_cue_by_tag(tag, cue_tag_data, nullptr);
+	}
+
+	// 5. Deliver events
+	TypedArray<StringName> deliver_events = p_package->get_events_on_deliver();
+	for (int i = 0; i < deliver_events.size(); i++) {
+		dispatch_event(deliver_events[i], p_source_component, p_lvl);
 	}
 }
 
@@ -1171,7 +1465,7 @@ Ref<ASEffect> ASComponent::find_effect_by_tag(const StringName &p_tag) const {
 	return Ref<ASEffect>();
 }
 
-Ref<ASEffectSpec> ASComponent::make_outgoing_spec(Ref<ASEffect> p_effect, float p_level, Object *p_target_node) {
+Ref<ASEffectSpec> ASComponent::make_outgoing_spec(Ref<ASEffect> p_effect, float p_lvl, Object *p_target_node) {
 	ERR_FAIL_COND_V(p_effect.is_null(), Ref<ASEffectSpec>());
 
 	// Validation: Outgoing effects must be part of the archetype contract.
@@ -1188,8 +1482,9 @@ Ref<ASEffectSpec> ASComponent::make_outgoing_spec(Ref<ASEffect> p_effect, float 
 							break;
 						}
 					}
-					if (found)
+					if (found) {
 						break;
+					}
 
 					TypedArray<Dictionary> costs = ability->get_costs();
 					for (int j = 0; j < costs.size(); j++) {
@@ -1202,15 +1497,17 @@ Ref<ASEffectSpec> ASComponent::make_outgoing_spec(Ref<ASEffect> p_effect, float 
 							}
 						}
 					}
-					if (found)
+					if (found) {
 						break;
+					}
 				}
 			}
 
 			if (!found) {
 				String path = p_effect->get_path();
-				if (path.is_empty())
+				if (path.is_empty()) {
 					path = p_effect->get_class();
+				}
 				ERR_PRINT(vformat("ASComponent Error: Effect '%s' is NOT registered in the source's AbilityContainer.", path));
 			}
 		}
@@ -1218,7 +1515,7 @@ Ref<ASEffectSpec> ASComponent::make_outgoing_spec(Ref<ASEffect> p_effect, float 
 
 	Ref<ASEffectSpec> spec;
 	spec.instantiate();
-	spec->init(p_effect, p_level);
+	spec->init(p_effect, p_lvl);
 	spec->set_source_component(this);
 	spec->set_target_node(p_target_node);
 	return spec;
@@ -1399,6 +1696,12 @@ finish_cues: {
 	}
 }
 	emit_signal("effect_applied", p_spec);
+
+	// Emit events on apply
+	TypedArray<StringName> apply_events = effect->get_events_on_apply();
+	for (int i = 0; i < apply_events.size(); i++) {
+		dispatch_event(apply_events[i], p_spec->get_source_component(), p_spec->get_level());
+	}
 }
 
 // --- Cue Activation API ---
@@ -1593,6 +1896,11 @@ void ASComponent::_handle_ability_triggers(const StringName &p_tag, ASAbility::T
 		}
 	}
 
+	// Handle Events as triggers
+	if (p_type == ASAbility::TRIGGER_ON_EVENT) {
+		// This is handled in dispatch_event itself to be more efficient
+	}
+
 	_handling_triggers = false;
 }
 
@@ -1641,8 +1949,9 @@ TypedArray<ASAttributeSet> ASComponent::get_attribute_sets() const {
 }
 
 void ASComponent::_on_attribute_set_attribute_changed(const StringName &p_name, float p_old_val, float p_new_val) {
-	if (_is_rolling_back)
+	if (_is_rolling_back) {
 		return;
+	}
 	emit_signal("attribute_changed", p_name, p_old_val, p_new_val);
 }
 
@@ -1828,8 +2137,9 @@ float ASComponent::get_ability_cooldown_preview(const StringName &p_tag) const {
 bool ASComponent::_is_server() const {
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 	Ref<MultiplayerAPI> mp = get_multiplayer();
-	if (mp.is_null())
+	if (mp.is_null()) {
 		return true; // Standalone
+	}
 	return mp->is_server();
 #else
 	return !get_tree() || get_tree()->get_multiplayer()->is_server();
@@ -1841,51 +2151,10 @@ bool ASComponent::_is_local_authority() const {
 }
 
 void ASComponent::capture_snapshot() {
-	// 1. Capture to Light Cache (Always)
-	ASStateCache s;
-	s.tick = current_tick;
+	// 1. Capture to Light Cache (In-memory circular buffer)
+	state_cache.capture_state(this);
 
-	// Attributes
-	for (int i = 0; i < attribute_sets.size(); i++) {
-		if (attribute_sets[i].is_null())
-			continue;
-		TypedArray<StringName> attrs = attribute_sets[i]->get_attribute_list();
-		for (int j = 0; j < attrs.size(); j++) {
-			StringName name = attrs[j];
-			s.attributes[name] = attribute_sets[i]->get_attribute_base_value(name);
-		}
-	}
-
-	// Tags
-	TypedArray<StringName> all_tags = get_tags();
-	for (int i = 0; i < all_tags.size(); i++) {
-		s.tags.push_back(all_tags[i]);
-	}
-
-	// Effects
-	for (int i = 0; i < active_effects.size(); i++) {
-		Ref<ASEffectSpec> spec = active_effects[i];
-		if (spec.is_null())
-			continue;
-		Ref<ASEffect> effect = spec->get_effect();
-		if (effect.is_null())
-			continue;
-
-		ASEffectState es;
-		es.tag = effect->get_effect_tag();
-		es.remaining_time = spec->get_duration_remaining();
-		es.period_timer = spec->get_period_timer();
-		es.stack_count = spec->get_stack_count();
-		es.level = spec->get_level();
-		s.active_effects.push_back(es);
-	}
-
-	cache_buffer.push_back(s);
-	if (cache_buffer.size() > 128) {
-		cache_buffer.remove_at(0);
-	}
-
-	// 2. Capture to Snapshot Resource (If assigned - typically for Players)
+	// 2. Capture to Snapshot Resource (If assigned - typically for Players/Saving)
 	if (snapshot_state.is_valid()) {
 		snapshot_state->set_tick(current_tick);
 		snapshot_state->capture_from_component(this);
@@ -1894,51 +2163,13 @@ void ASComponent::capture_snapshot() {
 
 void ASComponent::apply_snapshot(uint32_t p_tick) {
 	_is_rolling_back = true;
-	// 1. Try Light Cache first (High performance)
-	for (int i = cache_buffer.size() - 1; i >= 0; i--) {
-		if (cache_buffer[i].tick == p_tick) {
-			const ASStateCache &s = cache_buffer[i];
 
-			// Restore Attributes (No-update loop)
-			for (const KeyValue<StringName, float> &E : s.attributes) {
-				for (int j = 0; j < attribute_sets.size(); j++) {
-					if (attribute_sets[j].is_valid() && attribute_sets[j]->has_attribute(E.key)) {
-						attribute_sets[j]->set_attribute_base_value(E.key, E.value);
-						break;
-					}
-				}
-			}
-
-			// Restore Tags
-			if (owned_tags.is_valid()) {
-				owned_tags->clear();
-				for (int j = 0; j < s.tags.size(); j++) {
-					owned_tags->add_tag(s.tags[j]);
-				}
-			}
-
-			// Restore Effects (Silent clear and re-instantiate)
-			active_effects.clear();
-			for (int j = 0; j < s.active_effects.size(); j++) {
-				const ASEffectState &es = s.active_effects[j];
-				Ref<ASEffect> e = find_effect_by_tag(es.tag);
-				if (e.is_valid()) {
-					Ref<ASEffectSpec> spec;
-					spec.instantiate();
-					spec->init(e, es.level);
-					spec->set_duration_remaining(es.remaining_time);
-					spec->set_period_timer(es.period_timer);
-					spec->set_stack_count(es.stack_count);
-					spec->set_target_component(this);
-					active_effects.push_back(spec);
-				}
-			}
-
-			current_tick = p_tick;
-			_is_rolling_back = false;
-			_update_attribute_current_values();
-			return;
-		}
+	// 1. Try Light Cache first (High performance circular buffer)
+	if (state_cache.restore_state(this, p_tick)) {
+		current_tick = p_tick;
+		_is_rolling_back = false;
+		_update_attribute_current_values();
+		return;
 	}
 
 	// 2. Try Snapshot Resource fallback
@@ -1965,6 +2196,111 @@ void ASComponent::confirm_ability_activation(const StringName &p_tag) {
 	// Reconcile prediction
 }
 
+void ASComponent::dispatch_event(const StringName &p_tag, Node *p_instigator, float p_magnitude, const Dictionary &p_custom_payload) {
+	if (p_tag.is_empty()) {
+		return;
+	}
+
+	// Business Rule: Ensure only EVENT tags are dispatched.
+	// We use detection because tags might be created dynamically.
+	if (ASTagUtils::detect_tag_type(p_tag) != ASTagType::EVENT) {
+		ERR_PRINT(vformat("ASComponent: Cannot dispatch non-event tag '%s'. Tag must follow 'Event.' naming convention.", p_tag));
+		return;
+	}
+	// Check if this event is subscribed in the container
+	bool subscribed = false;
+	if (container.is_valid()) {
+		TypedArray<StringName> sub_events = container->get_events();
+		for (int i = 0; i < sub_events.size(); i++) {
+			if ((StringName)sub_events[i] == p_tag) {
+				subscribed = true;
+				break;
+			}
+		}
+	}
+
+	if (!subscribed) {
+		// If not subscribed, we don't process it as a gameplay event,
+		// but we still emit signals for external listeners.
+		emit_signal("event_received", p_tag, p_instigator, p_magnitude, p_custom_payload);
+		emit_signal("tag_event_received", p_tag, p_custom_payload);
+		return;
+	}
+
+	ASEventTagData data;
+	data.event_tag = p_tag;
+	data.set_instigator(p_instigator);
+	data.set_target(this);
+	data.magnitude = p_magnitude;
+	data.custom_payload = p_custom_payload;
+
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+	data.timestamp = (double)Time::get_singleton()->get_ticks_msec() / 1000.0;
+#else
+	data.timestamp = (double)OS::get_singleton()->get_ticks_msec() / 1000.0;
+#endif
+
+	data.tick_id = current_tick;
+
+	ASEventTagHistoricalEntry entry;
+	entry.data = data;
+	entry.tick = current_tick;
+
+	_event_history.push_back(entry);
+	if (_event_history.size() > _event_history_max_size) {
+		_event_history.remove_at(0);
+	}
+
+	// Trigger abilities waiting for this event
+	_handle_ability_triggers(p_tag, ASAbility::TRIGGER_ON_EVENT);
+
+	emit_signal("event_received", p_tag, p_instigator, p_magnitude, p_custom_payload);
+	emit_signal("tag_event_received", p_tag, p_custom_payload); // Legacy support
+}
+
+bool ASComponent::has_event_occurred(const StringName &p_tag, float p_lookback_sec) const {
+	double current_time;
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+	current_time = (double)Time::get_singleton()->get_ticks_msec() / 1000.0;
+#else
+	current_time = (double)OS::get_singleton()->get_ticks_msec() / 1000.0;
+#endif
+
+	for (int i = _event_history.size() - 1; i >= 0; i--) {
+		const ASEventTagHistoricalEntry &entry = _event_history[i];
+
+		if (current_time - entry.data.timestamp > (double)p_lookback_sec) {
+			break;
+		}
+
+		if (p_tag != StringName() && entry.data.event_tag != p_tag) {
+			continue;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+void ASComponent::clear_event_history() {
+	_event_history.clear();
+}
+
+void ASComponent::clear_tag_history() {
+	clear_name_history();
+	clear_conditional_history();
+	clear_event_history();
+}
+
+void ASComponent::clear_name_history() {
+	_name_history.clear();
+}
+
+void ASComponent::clear_conditional_history() {
+	_cond_history.clear();
+}
+
 ASComponent::ASComponent() {
 	owned_tags.instantiate();
 }
@@ -1974,3 +2310,4 @@ ASComponent::~ASComponent() {
 	active_effects.clear();
 	unlocked_abilities.clear();
 }
+} // namespace godot

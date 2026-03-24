@@ -36,9 +36,7 @@
 #include "modules/ability_system/core/as_tag_spec.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASTagSpec::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_tag", "tag", "exact"), &ASTagSpec::has_tag, DEFVAL(false));
@@ -88,7 +86,7 @@ bool ASTagSpec::add_tag(const StringName &p_tag) {
 
 	// Register with global system if available
 	if (AbilitySystem::get_singleton()) {
-		AbilitySystem::get_singleton()->register_tag(p_tag, AbilitySystem::TAG_TYPE_CONDITIONAL);
+		AbilitySystem::get_singleton()->register_tag(p_tag, (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 	}
 
 	if (tags.has(p_tag)) {
@@ -128,3 +126,4 @@ ASTagSpec::ASTagSpec() {
 
 ASTagSpec::~ASTagSpec() {
 }
+} // namespace godot

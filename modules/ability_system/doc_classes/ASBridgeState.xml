@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASBridgeState" inherits="LimboState" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		LimboState with integrated Ability System support.
+	</brief_description>
+	<description>
+		A [LimboState] that integrates with Ability System. Provides automatic event dispatching on state transitions and event listening for automatic transitions.
+		Can require specific tags to be present before entering, and dispatches AS events on [method _enter], [method _exit], and [method _update].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="can_enter_state">
+			<return type="bool" />
+			<param index="0" name="agent" type="Node" />
+			<description>
+				Returns [code]true[/code] if this state can be entered (checks required tags if [member check_tags_on_enter] is enabled).
+			</description>
+		</method>
+		<method name="get_check_tags_on_enter">
+			<return type="bool" />
+			<description>
+				Returns whether to check required tags before entering.
+			</description>
+		</method>
+		<method name="get_enter_events">
+			<return type="Array" />
+			<description>
+				Returns the array of events to dispatch on state enter.
+			</description>
+		</method>
+		<method name="get_exit_events">
+			<return type="Array" />
+			<description>
+				Returns the array of events to dispatch on state exit.
+			</description>
+		</method>
+		<method name="get_listen_events">
+			<return type="Array" />
+			<description>
+				Returns the array of events to listen for (trigger transition).
+			</description>
+		</method>
+		<method name="get_required_tags">
+			<return type="Array" />
+			<description>
+				Returns the array of tags required to enter this state.
+			</description>
+		</method>
+		<method name="get_transition_event">
+			<return type="StringName" />
+			<description>
+				Returns the event that triggers automatic transition out of this state.
+			</description>
+		</method>
+		<method name="get_update_events">
+			<return type="Array" />
+			<description>
+				Returns the array of events to dispatch during state update.
+			</description>
+		</method>
+		<method name="set_check_tags_on_enter">
+			<return type="void" />
+			<param index="0" name="check" type="bool" />
+			<description>
+				If [code]true[/code], validates required tags before allowing state entry.
+			</description>
+		</method>
+		<method name="set_enter_events">
+			<return type="void" />
+			<param index="0" name="events" type="Array" />
+			<description>
+				Sets the events to dispatch when entering this state.
+			</description>
+		</method>
+		<method name="set_exit_events">
+			<return type="void" />
+			<param index="0" name="events" type="Array" />
+			<description>
+				Sets the events to dispatch when exiting this state.
+			</description>
+		</method>
+		<method name="set_listen_events">
+			<return type="void" />
+			<param index="0" name="events" type="Array" />
+			<description>
+				Sets the events to listen for. When detected, triggers [method event_finished].
+			</description>
+		</method>
+		<method name="set_required_tags">
+			<return type="void" />
+			<param index="0" name="tags" type="Array" />
+			<description>
+				Sets the tags required for this state to be entered.
+			</description>
+		</method>
+		<method name="set_transition_event">
+			<return type="void" />
+			<param index="0" name="event" type="StringName" />
+			<description>
+				Sets the event that triggers automatic transition from this state.
+			</description>
+		</method>
+		<method name="set_update_events">
+			<return type="void" />
+			<param index="0" name="events" type="Array" />
+			<description>
+				Sets the events to dispatch during each [method _update] call.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="check_tags_on_enter" type="bool" setter="set_check_tags_on_enter" getter="get_check_tags_on_enter" default="false" />
+		<member name="enter_events" type="Array" setter="set_enter_events" getter="get_enter_events" default="[]" />
+		<member name="exit_events" type="Array" setter="set_exit_events" getter="get_exit_events" default="[]" />
+		<member name="listen_events" type="Array" setter="set_listen_events" getter="get_listen_events" default="[]" />
+		<member name="required_tags" type="Array" setter="set_required_tags" getter="get_required_tags" default="[]" />
+		<member name="transition_event" type="StringName" setter="set_transition_event" getter="get_transition_event" default="&amp;&quot;&amp;quot;" />
+		<member name="update_events" type="Array" setter="set_update_events" getter="get_update_events" default="[]" />
+	</members>
+</class>

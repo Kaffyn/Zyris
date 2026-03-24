@@ -113,6 +113,12 @@
 		<member name="granted_tags" type="StringName[]" setter="set_granted_tags" getter="get_granted_tags" default="[]">
 			Tags granted while effect is active.
 		</member>
+		<member name="events_on_apply" type="StringName[]" setter="set_events_on_apply" getter="get_events_on_apply" default="[]">
+			Events dispatched when this effect is successfully applied to a target.
+		</member>
+		<member name="events_on_remove" type="StringName[]" setter="set_events_on_remove" getter="get_events_on_remove" default="[]">
+			Events dispatched when this effect is removed from a target.
+		</member>
 		<member name="modifiers" type="int" setter="set_modifiers_count" getter="get_modifiers_count" default="0">
 			The number of attribute modifiers in this effect package.
 		</member>

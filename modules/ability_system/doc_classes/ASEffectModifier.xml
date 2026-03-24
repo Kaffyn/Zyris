@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEffectModifier" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Represents a single attribute modifier for effects.
+	</brief_description>
+	<description>
+		ASEffectModifier defines how an effect modifies a specific attribute.
+		Contains the attribute name, operation type (add, multiply, set, etc.),
+		and magnitude value for the modification.
+
+		Used by ASEffect to define attribute changes and by ASEffectSpec
+		for runtime modifier calculations. Supports serialization for
+		save/load operations and network replication.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the modifier to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads modifier data from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="attribute" type="StringName" setter="set_attribute" getter="get_attribute" default="&quot;&quot;">
+			The name of the attribute this modifier affects.
+		</member>
+		<member name="operation" type="int" setter="set_operation" getter="get_operation" default="0">
+			The modification operation (0=Add, 1=Multiply, 2=Set, etc.).
+		</member>
+		<member name="magnitude" type="float" setter="set_magnitude" getter="get_magnitude" default="0.0">
+			The magnitude/value used for the modification operation.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

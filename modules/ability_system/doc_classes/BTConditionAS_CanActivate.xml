@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="BTConditionAS_CanActivate" inherits="BTCondition" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../doc/class.xsd">
+	<brief_description>
+		BTCondition that checks if an ability can be activated.
+	</brief_description>
+	<description>
+		A Behavior Tree condition that checks if an ability can be activated (requirements met, cooldown ready, costs affordable) without actually activating it.
+		Uses [method ASComponent.can_activate_ability_by_tag]. Returns [constant BT.SUCCESS] if can activate, [constant BT.FAILURE] otherwise.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_ability_tag">
+			<return type="StringName" />
+			<description>
+				Returns the ability tag to check.
+			</description>
+		</method>
+		<method name="set_ability_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Sets the ability tag to check for activation possibility.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="ability_tag" type="StringName" setter="set_ability_tag" getter="get_ability_tag" default="&amp;&quot;&amp;quot;" />
+	</members>
+</class>

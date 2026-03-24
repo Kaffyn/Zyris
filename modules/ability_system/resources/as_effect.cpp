@@ -31,14 +31,20 @@
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include "src/resources/as_effect.h"
 #include "src/core/ability_system.h"
+#include "src/core/as_tag_types.h"
+#include "src/core/as_utils.h"
+#include "src/resources/as_ability.h"
+#include "src/resources/as_cue.h"
 #else
 #include "modules/ability_system/core/ability_system.h"
+#include "modules/ability_system/core/as_tag_types.h"
+#include "modules/ability_system/core/as_utils.h"
+#include "modules/ability_system/resources/as_ability.h"
+#include "modules/ability_system/resources/as_cue.h"
 #include "modules/ability_system/resources/as_effect.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASEffect::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_effect_name", "name"), &ASEffect::set_effect_name);
@@ -91,6 +97,10 @@ void ASEffect::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_blocked_tags"), &ASEffect::get_blocked_tags);
 	ClassDB::bind_method(D_METHOD("set_removed_tags", "tags"), &ASEffect::set_removed_tags);
 	ClassDB::bind_method(D_METHOD("get_removed_tags"), &ASEffect::get_removed_tags);
+	ClassDB::bind_method(D_METHOD("set_events_on_apply", "events"), &ASEffect::set_events_on_apply);
+	ClassDB::bind_method(D_METHOD("get_events_on_apply"), &ASEffect::get_events_on_apply);
+	ClassDB::bind_method(D_METHOD("set_events_on_remove", "events"), &ASEffect::set_events_on_remove);
+	ClassDB::bind_method(D_METHOD("get_events_on_remove"), &ASEffect::get_events_on_remove);
 	ClassDB::bind_method(D_METHOD("set_cues", "cues"), &ASEffect::set_cues);
 	ClassDB::bind_method(D_METHOD("get_cues"), &ASEffect::get_cues);
 
@@ -113,8 +123,11 @@ void ASEffect::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "granted_tags", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_granted_tags", "get_granted_tags");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "blocked_tags", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_blocked_tags", "get_blocked_tags");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "removed_tags", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_removed_tags", "get_removed_tags");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "events_on_apply", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_events_on_apply", "get_events_on_apply");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "events_on_remove", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_events_on_remove", "get_events_on_remove");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "cues", PROPERTY_HINT_RESOURCE_TYPE, "ASCue"), "set_cues", "get_cues");
 
+	ADD_GROUP("Requirements", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "modifiers", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_ARRAY, "Modifiers,modifiers/"), "set_modifiers_count", "get_modifiers_count");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "requirements", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_ARRAY, "Requirements,requirements/"), "set_requirements_count", "get_requirements_count");
 
@@ -137,9 +150,9 @@ void ASEffect::_bind_methods() {
 }
 
 void ASEffect::add_modifier(const StringName &p_attr, ModifierOp p_op, float p_mag, bool p_custom) {
-	ModifierData md;
+	ASEffectModifierData md;
 	md.attribute = p_attr;
-	md.operation = p_op;
+	md.operation = (godot::ModifierOp)p_op;
 	md.magnitude = p_mag;
 	md.use_custom_magnitude = p_custom;
 	modifiers.push_back(md);
@@ -157,7 +170,7 @@ StringName ASEffect::get_modifier_attribute(int p_idx) const {
 
 ASEffect::ModifierOp ASEffect::get_modifier_operation(int p_idx) const {
 	ERR_FAIL_INDEX_V(p_idx, modifiers.size(), OP_ADD);
-	return modifiers[p_idx].operation;
+	return (ModifierOp)modifiers[p_idx].operation;
 }
 
 float ASEffect::get_modifier_magnitude(int p_idx) const {
@@ -180,7 +193,7 @@ int ASEffect::get_requirements_count() const {
 }
 
 void ASEffect::add_requirement(const StringName &p_attr, float p_amount) {
-	RequirementData rd;
+	ASEffectRequirement rd;
 	rd.attribute = p_attr;
 	rd.amount = p_amount;
 	requirements.push_back(rd);
@@ -210,7 +223,7 @@ bool ASEffect::_set(const StringName &p_name, const Variant &p_value) {
 			modifiers.write[index].attribute = p_value;
 			return true;
 		} else if (what == "operation") {
-			modifiers.write[index].operation = (ModifierOp)(int)p_value;
+			modifiers.write[index].operation = (godot::ModifierOp)(int)p_value;
 			return true;
 		} else if (what == "magnitude") {
 			modifiers.write[index].magnitude = p_value;
@@ -317,16 +330,20 @@ void ASEffect::set_activation_required_all_tags(const TypedArray<StringName> &p_
 	activation_required_all_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
+}
+
+TypedArray<StringName> ASEffect::get_activation_required_all_tags() const {
+	return activation_required_all_tags;
 }
 
 void ASEffect::set_activation_required_any_tags(const TypedArray<StringName> &p_tags) {
 	activation_required_any_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -335,7 +352,7 @@ void ASEffect::set_activation_blocked_any_tags(const TypedArray<StringName> &p_t
 	activation_blocked_any_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -344,7 +361,7 @@ void ASEffect::set_activation_blocked_all_tags(const TypedArray<StringName> &p_t
 	activation_blocked_all_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -352,7 +369,7 @@ void ASEffect::set_activation_blocked_all_tags(const TypedArray<StringName> &p_t
 void ASEffect::set_effect_tag(const StringName &p_tag) {
 	effect_tag = p_tag;
 	if (AbilitySystem::get_singleton()) {
-		AbilitySystem::get_singleton()->register_tag(p_tag, AbilitySystem::TAG_TYPE_NAME, get_instance_id());
+		AbilitySystem::get_singleton()->register_tag(p_tag, (ASTagType)AbilitySystem::TAG_TYPE_NAME, get_instance_id());
 	}
 
 	// Propagate to cues
@@ -368,27 +385,65 @@ void ASEffect::set_granted_tags(const TypedArray<StringName> &p_tags) {
 	granted_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
+}
+
+TypedArray<StringName> ASEffect::get_granted_tags() const {
+	return granted_tags;
 }
 
 void ASEffect::set_blocked_tags(const TypedArray<StringName> &p_tags) {
 	blocked_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
+}
+
+TypedArray<StringName> ASEffect::get_blocked_tags() const {
+	return blocked_tags;
 }
 
 void ASEffect::set_removed_tags(const TypedArray<StringName> &p_tags) {
 	removed_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
+}
+
+TypedArray<StringName> ASEffect::get_removed_tags() const {
+	return removed_tags;
+}
+
+void ASEffect::set_events_on_apply(const TypedArray<StringName> &p_events) {
+	events_on_apply = p_events;
+	if (AbilitySystem::get_singleton()) {
+		for (int i = 0; i < p_events.size(); i++) {
+			AbilitySystem::get_singleton()->register_tag(p_events[i], (ASTagType)AbilitySystem::TAG_TYPE_EVENT);
+		}
+	}
+}
+
+TypedArray<StringName> ASEffect::get_events_on_apply() const {
+	return events_on_apply;
+}
+
+void ASEffect::set_events_on_remove(const TypedArray<StringName> &p_events) {
+	events_on_remove = p_events;
+	if (AbilitySystem::get_singleton()) {
+		for (int i = 0; i < p_events.size(); i++) {
+			AbilitySystem::get_singleton()->register_tag(p_events[i], (ASTagType)AbilitySystem::TAG_TYPE_EVENT);
+		}
+	}
+}
+
+TypedArray<StringName> ASEffect::get_events_on_remove() const {
+	return events_on_remove;
 }
 
 void ASEffect::set_cues(const TypedArray<ASCue> &p_cues) {
@@ -403,8 +458,13 @@ void ASEffect::set_cues(const TypedArray<ASCue> &p_cues) {
 	}
 }
 
+TypedArray<ASCue> ASEffect::get_cues() const {
+	return cues;
+}
+
 ASEffect::ASEffect() {
 }
 
 ASEffect::~ASEffect() {
 }
+} // namespace godot

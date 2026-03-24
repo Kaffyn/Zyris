@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASAbilityPhase" inherits="ASAbility" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Base resource for defining abilities within the module.
+	</brief_description>
+	<description>
+		[ASAbility] defines the logic and data for a specific action. It manages its own costs, cooldowns, and tags.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="_on_activate_ability" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method to implement the ability's logic.
+			</description>
+		</method>
+		<method name="_on_can_activate_ability" qualifiers="virtual const">
+			<return type="bool" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method to implement custom activation requirements.
+			</description>
+		</method>
+		<method name="_on_end_ability" qualifiers="virtual">
+			<return type="void" />
+			<param index="0" name="owner" type="Object" />
+			<param index="1" name="spec" type="RefCounted" />
+			<description>
+				Virtual method called when the ability ends.
+			</description>
+		</method>
+		<method name="activate_ability">
+			<return type="void" />
+			<param index="0" name="owner" type="ASComponent" />
+			<param index="1" name="spec" type="ASAbilitySpec" default="null" />
+			<param index="2" name="target_node" type="Object" default="null" />
+			<description>
+				Starts the ability execution. Handles native costs and cooldown application automatically.
+			</description>
+		</method>
+		<method name="add_cost">
+			<return type="void" />
+			<param index="0" name="attribute" type="StringName" />
+			<param index="1" name="amount" type="float" />
+			<description>
+				Adds a native cost modifier.
+			</description>
+		</method>
+		<method name="add_requirement">
+			<return type="void" />
+			<param index="0" name="attribute" type="StringName" />
+			<param index="1" name="amount" type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="add_trigger">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<param index="1" name="type" type="int" enum="ASAbility.TriggerType" />
+			<description>
+			</description>
+		</method>
+		<method name="apply_costs" qualifiers="const">
+			<return type="void" />
+			<param index="0" name="owner" type="ASComponent" />
+			<param index="1" name="spec" type="ASAbilitySpec" default="null" />
+			<description>
+				Unpacks and applies all effects and cues contained in the [ASPackage] to this component.
+			</description>
+		</method>
+		<method name="calculate_ability_duration" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="owner" type="ASComponent" />
+			<description>
+				Calculates the duration of the ability, considering [member ability_use_custom_duration].
+			</description>
+		</method>
+		<method name="can_activate_ability" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="owner" type="ASComponent" />
+			<param index="1" name="spec" type="ASAbilitySpec" default="null" />
+			<description>
+				Returns true if the ability can be activated (checks tags, costs, and cooldown).
+			</description>
+		</method>
+		<method name="can_afford_costs" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="owner" type="ASComponent" />
+			<param index="1" name="spec" type="ASAbilitySpec" default="null" />
+			<description>
+				Checks if the owner has enough resources to afford the costs.
+			</description>
+		</method>
+		<method name="can_satisfy_requirements" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="owner" type="ASComponent" />
+			<param index="1" name="spec" type="ASAbilitySpec" default="null" />
+			<description>
+				Checks if the owner satisfies the attribute requirements defined in this ability.
+			</description>
+		</method>
+		<method name="end_ability">
+			<return type="void" />
+			<param index="0" name="owner" type="ASComponent" />
+			<param index="1" name="spec" type="ASAbilitySpec" default="null" />
+			<description>
+				Ends the ability execution and cleans up owned tags.
+			</description>
+		</method>
+		<method name="get_cost_amount" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+				Returns the cost amount for a specific attribute of this ability.
+			</description>
+		</method>
+		<method name="get_requirement_amount" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+			</description>
+		</method>
+		<method name="get_requirement_count" qualifiers="const">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="remove_cost">
+			<return type="bool" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+				Removes a cost definition for a specific attribute.
+			</description>
+		</method>
+		<method name="remove_requirement">
+			<return type="bool" />
+			<param index="0" name="attribute" type="StringName" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="ability_duration" type="float" setter="set_ability_duration" getter="get_ability_duration" default="0.0">
+			Base duration of the ability.
+		</member>
+		<member name="ability_duration_policy" type="int" setter="set_duration_policy" getter="get_duration_policy" enum="ASAbility.DurationPolicy" default="0">
+			Defines how the ability duration is handled (0: Instant, 1: Duration, 2: Infinite).
+		</member>
+		<member name="ability_name" type="String" setter="set_ability_name" getter="get_ability_name" default="&quot;&quot;">
+			Unique name for this ability.
+		</member>
+		<member name="ability_tag" type="StringName" setter="set_ability_tag" getter="get_ability_tag" default="&amp;&quot;&quot;">
+			The unique tag identifying this ability.
+		</member>
+		<member name="ability_use_custom_duration" type="bool" setter="set_use_custom_duration" getter="get_use_custom_duration" default="false">
+			If true, triggers custom magnitude calculation for duration.
+		</member>
+		<member name="activation_blocked_all_tags" type="StringName[]" setter="set_activation_blocked_all_tags" getter="get_activation_blocked_all_tags" default="[]">
+			Ability cannot activate if owner has [b]all[/b] of these tags simultaneously (AND logic).
+		</member>
+		<member name="activation_blocked_any_tags" type="StringName[]" setter="set_activation_blocked_any_tags" getter="get_activation_blocked_any_tags" default="[]">
+			Ability cannot activate if owner has [b]any[/b] of these tags (OR logic).
+		</member>
+		<member name="activation_cancel_tags" type="StringName[]" setter="set_activation_cancel_tags" getter="get_activation_cancel_tags" default="[]">
+			Tags of active abilities that will be canceled when this ability activates.
+		</member>
+		<member name="activation_owned_tags" type="StringName[]" setter="set_activation_owned_tags" getter="get_activation_owned_tags" default="[]">
+			Tags granted to the owner while the ability is active.
+		</member>
+		<member name="activation_required_all_tags" type="StringName[]" setter="set_activation_required_all_tags" getter="get_activation_required_all_tags" default="[]">
+			Owner must have [b]all[/b] of these tags to activate (AND logic).
+		</member>
+		<member name="activation_required_any_tags" type="StringName[]" setter="set_activation_required_any_tags" getter="get_activation_required_any_tags" default="[]">
+			Owner must have [b]at least one[/b] of these tags to activate (OR logic).
+		</member>
+		<member name="cooldown_duration" type="float" setter="set_cooldown_duration" getter="get_cooldown_duration" default="0.0">
+			Base duration of cooldown.
+		</member>
+		<member name="cooldown_tags" type="StringName[]" setter="set_cooldown_tags" getter="get_cooldown_tags" default="[]">
+			Tags applied during cooldown.
+		</member>
+		<member name="cooldown_use_custom" type="bool" setter="set_use_custom_cooldown" getter="get_use_custom_cooldown" default="false">
+			If true, triggers custom magnitude calculation for cooldown duration.
+		</member>
+		<member name="costs" type="Dictionary[]" setter="set_costs" getter="get_costs" default="[]">
+			Array of native costs (attribute and amount).
+		</member>
+		<member name="costs_use_custom" type="bool" setter="set_use_custom_costs" getter="get_use_custom_costs" default="false">
+			If true, triggers custom magnitude calculation for modifier amounts.
+		</member>
+		<member name="cues" type="ASCue[]" setter="set_cues" getter="get_cues" default="[]">
+			Visual/Audio cues triggered on start and end.
+		</member>
+		<member name="effects" type="ASEffect[]" setter="set_effects" getter="get_effects" default="[]">
+			List of effects applied by this ability.
+		</member>
+		<member name="requirements" type="Dictionary[]" setter="set_requirements" getter="get_requirements" default="[]">
+			Attribute requirements needed to activate the ability.
+		</member>
+		<member name="triggers" type="Dictionary[]" setter="set_triggers" getter="get_triggers" default="[]">
+			Automatic triggers for this ability (e.g. activate when a tag is added).
+		</member>
+	</members>
+	<constants>
+		<constant name="POLICY_INSTANT" value="0" enum="DurationPolicy">
+			Ability triggers its effect once and ends immediately.
+		</constant>
+		<constant name="POLICY_DURATION" value="1" enum="DurationPolicy">
+			Ability has a fixed duration.
+		</constant>
+		<constant name="POLICY_INFINITE" value="2" enum="DurationPolicy">
+			Ability remains active until explicitly ended.
+		</constant>
+		<constant name="TRIGGER_ON_TAG_ADDED" value="0" enum="TriggerType">
+			Ability attempts to activate when a specific Tag is added to the owner.
+		</constant>
+		<constant name="TRIGGER_ON_TAG_REMOVED" value="1" enum="TriggerType">
+			Ability attempts to activate when a specific Tag is removed from the owner.
+		</constant>
+		<constant name="TRIGGER_ON_EVENT" value="2" enum="TriggerType">
+			Ability attempts to activate when a specific [ASEventTag] is dispatched to the owner. This is the preferred way for reactive triggers like "Counter-attack on Hit".
+		</constant>
+	</constants>
+</class>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASConditionalTag" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Requirement/block tag for ability prerequisites and immunities (Can.Parried, Immune.Fire).
+	</brief_description>
+	<description>
+		ASConditionalTag represents tags used in logical evaluation for ability requirements
+		and effect blockers. These are typically short-term tags that grant permissions or
+		special conditions.
+
+		Used for ability prerequisites (Can.Parried, Can.Dodged), damage immunity
+		(Immune.Fire, Immune.Poison), and state conditions (State.Grounded, State.Flying).
+
+		From BUSINESS_RULES.md: "Used in logical evaluation (AND/OR) for requirements."
+		These tags participate in Required All/Any and Blocked All/Any predicates.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="create" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<param index="0" name="name" type="StringName" />
+			<description>
+				Creates a new ASConditionalTag with the specified name.
+			</description>
+		</method>
+		<method name="CAN_PARRY" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined CAN_PARRY permission tag.
+			</description>
+		</method>
+		<method name="CAN_DODGE" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined CAN_DODGE permission tag.
+			</description>
+		</method>
+		<method name="CAN_INTERRUPT" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined CAN_INTERRUPT permission tag.
+			</description>
+		</method>
+		<method name="IMMUNE_FIRE" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined IMMUNE_FIRE immunity tag.
+			</description>
+		</method>
+		<method name="IMMUNE_POISON" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined IMMUNE_POISON immunity tag.
+			</description>
+		</method>
+		<method name="IMMUNE_PHYSICAL" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined IMMUNE_PHYSICAL immunity tag.
+			</description>
+		</method>
+		<method name="GROUNDED" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined GROUNDED state condition tag.
+			</description>
+		</method>
+		<method name="FLYING" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined FLYING state condition tag.
+			</description>
+		</method>
+		<method name="STEALTHED" qualifiers="static">
+			<return type="ASConditionalTag" />
+			<description>
+				Returns a predefined STEALTHED state condition tag.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="tag_name" type="StringName" />
+		<member name="tag_type" type="int" enum="ASTagType" />
+	</members>
+	<constants>
+		<constant name="CONDITIONAL" value="1" enum="ASTagType">
+			Tag type for requirement/block tags.
+		</constant>
+	</constants>
+</class>

@@ -40,16 +40,12 @@
 #include "core/object/class_db.h"
 #include "modules/register_module_types.h"
 #endif
-
 #ifdef ABILITY_SYSTEM_GDEXTENSION
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
-void initialize_as_module(ModuleInitializationLevel p_level);
-void uninitialize_as_module(ModuleInitializationLevel p_level);
+void initialize_as_module(godot::ModuleInitializationLevel p_lvl);
+void uninitialize_as_module(godot::ModuleInitializationLevel p_lvl);
 #else
-void initialize_ability_system_module(ModuleInitializationLevel p_level);
-void uninitialize_ability_system_module(ModuleInitializationLevel p_level);
+void initialize_ability_system_module(ModuleInitializationLevel p_lvl);
+void uninitialize_ability_system_module(ModuleInitializationLevel p_lvl);
 #endif
 
 #endif // ABILITY_SYSTEM_REGISTER_TYPES_H

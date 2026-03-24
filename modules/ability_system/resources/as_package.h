@@ -42,9 +42,7 @@
 #include "modules/ability_system/resources/as_effect.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 /**
  * ASPackage
@@ -60,33 +58,42 @@ private:
 	TypedArray<StringName> effect_tags;
 	TypedArray<ASCue> cues;
 	TypedArray<StringName> cue_tags;
+	TypedArray<StringName> events_on_deliver;
+	StringName package_tag;
 
 protected:
 	static void _bind_methods();
 
 public:
-	void set_effects(const TypedArray<ASEffect> &p_effects) { effects = p_effects; }
-	TypedArray<ASEffect> get_effects() const { return effects; }
+	void set_effects(const TypedArray<ASEffect> &p_effects);
+	TypedArray<ASEffect> get_effects() const;
 	void add_effect(const Ref<ASEffect> &p_effect);
 	void remove_effect(const Ref<ASEffect> &p_effect);
 	void clear_effects();
 
-	void set_effect_tags(const TypedArray<StringName> &p_tags) { effect_tags = p_tags; }
-	TypedArray<StringName> get_effect_tags() const { return effect_tags; }
+	void set_effect_tags(const TypedArray<StringName> &p_tags);
+	TypedArray<StringName> get_effect_tags() const;
 	void add_effect_tag(const StringName &p_tag);
 	void remove_effect_tag(const StringName &p_tag);
 
-	void set_cues(const TypedArray<ASCue> &p_cues) { cues = p_cues; }
-	TypedArray<ASCue> get_cues() const { return cues; }
+	void set_cues(const TypedArray<ASCue> &p_cues);
+	TypedArray<ASCue> get_cues() const;
 	void add_cue(const Ref<ASCue> &p_cue);
 	void remove_cue(const Ref<ASCue> &p_cue);
 	void clear_cues();
 
-	void set_cue_tags(const TypedArray<StringName> &p_tags) { cue_tags = p_tags; }
-	TypedArray<StringName> get_cue_tags() const { return cue_tags; }
+	void set_cue_tags(const TypedArray<StringName> &p_tags);
+	TypedArray<StringName> get_cue_tags() const;
 	void add_cue_tag(const StringName &p_tag);
 	void remove_cue_tag(const StringName &p_tag);
+
+	void set_events_on_deliver(const TypedArray<StringName> &p_events);
+	TypedArray<StringName> get_events_on_deliver() const;
+
+	void set_package_tag(const StringName &p_tag);
+	StringName get_package_tag() const;
 
 	ASPackage();
 	~ASPackage();
 };
+} // namespace godot

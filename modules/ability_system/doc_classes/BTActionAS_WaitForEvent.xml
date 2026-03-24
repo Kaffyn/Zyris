@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="BTActionAS_WaitForEvent" inherits="BTAction" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../doc/class.xsd">
+	<brief_description>
+		BTAction that waits for an Ability System event to occur.
+	</brief_description>
+	<description>
+		A Behavior Tree action that enters [constant BT.RUNNING] state and waits for a specific [ASEventTag] to occur. Uses [method ASComponent.has_event_occurred] to check the Events Historical buffer.
+		Returns [constant BT.SUCCESS] when event is detected within the time window, continues [constant BT.RUNNING] while waiting.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_event_tag">
+			<return type="StringName" />
+			<description>
+				Returns the event tag to wait for.
+			</description>
+		</method>
+		<method name="get_time_window">
+			<return type="float" />
+			<description>
+				Returns the time window for event detection (seconds).
+			</description>
+		</method>
+		<method name="set_event_tag">
+			<return type="void" />
+			<param index="0" name="tag" type="StringName" />
+			<description>
+				Sets the event tag to wait for.
+			</description>
+		</method>
+		<method name="set_time_window">
+			<return type="void" />
+			<param index="0" name="seconds" type="float" />
+			<description>
+				Sets the time window for event detection (how far back to check).
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="event_tag" type="StringName" setter="set_event_tag" getter="get_event_tag" default="&amp;&quot;&amp;quot;" />
+		<member name="time_window" type="float" setter="set_time_window" getter="get_time_window" default="0.5" />
+	</members>
+</class>

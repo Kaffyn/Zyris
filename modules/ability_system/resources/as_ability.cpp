@@ -35,6 +35,7 @@
 #include "src/core/as_cue_spec.h"
 #include "src/core/as_effect_spec.h"
 #include "src/core/as_tag_spec.h"
+#include "src/resources/as_ability_phase.h"
 #include "src/resources/as_cue.h"
 #include "src/resources/as_effect.h"
 #include "src/scene/as_component.h"
@@ -45,14 +46,13 @@
 #include "modules/ability_system/core/as_effect_spec.h"
 #include "modules/ability_system/core/as_tag_spec.h"
 #include "modules/ability_system/resources/as_ability.h"
+#include "modules/ability_system/resources/as_ability_phase.h"
 #include "modules/ability_system/resources/as_cue.h"
 #include "modules/ability_system/resources/as_effect.h"
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-#ifdef ABILITY_SYSTEM_GDEXTENSION
-using namespace godot;
-#endif
+namespace godot {
 
 void ASAbility::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_ability_name", "name"), &ASAbility::set_ability_name);
@@ -80,6 +80,17 @@ void ASAbility::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_cues", "cues"), &ASAbility::set_cues);
 	ClassDB::bind_method(D_METHOD("get_cues"), &ASAbility::get_cues);
+
+	ClassDB::bind_method(D_METHOD("get_sub_abilities"), &ASAbility::get_sub_abilities);
+	ClassDB::bind_method(D_METHOD("set_sub_abilities_auto_activate", "tags"), &ASAbility::set_sub_abilities_auto_activate);
+	ClassDB::bind_method(D_METHOD("get_sub_abilities_auto_activate"), &ASAbility::get_sub_abilities_auto_activate);
+	ClassDB::bind_method(D_METHOD("set_phases", "phases"), &ASAbility::set_phases);
+
+	ClassDB::bind_method(D_METHOD("set_events_on_activate", "events"), &ASAbility::set_events_on_activate);
+	ClassDB::bind_method(D_METHOD("get_events_on_activate"), &ASAbility::get_events_on_activate);
+
+	ClassDB::bind_method(D_METHOD("set_events_on_end", "events"), &ASAbility::set_events_on_end);
+	ClassDB::bind_method(D_METHOD("get_events_on_end"), &ASAbility::get_events_on_end);
 
 	ClassDB::bind_method(D_METHOD("set_effects", "effects"), &ASAbility::set_effects);
 	ClassDB::bind_method(D_METHOD("get_effects"), &ASAbility::get_effects);
@@ -142,6 +153,11 @@ void ASAbility::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "activation_cancel_tags", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_activation_cancel_tags", "get_activation_cancel_tags");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "cues", PROPERTY_HINT_ARRAY_TYPE, "ASCue"), "set_cues", "get_cues");
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "effects", PROPERTY_HINT_ARRAY_TYPE, "ASEffect"), "set_effects", "get_effects");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "events_on_activate", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_events_on_activate", "get_events_on_activate");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "events_on_end", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_events_on_end", "get_events_on_end");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "sub_abilities", PROPERTY_HINT_ARRAY_TYPE, "ASAbility"), "set_sub_abilities", "get_sub_abilities");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "sub_abilities_auto_activate", PROPERTY_HINT_ARRAY_TYPE, "StringName"), "set_sub_abilities_auto_activate", "get_sub_abilities_auto_activate");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "phases", PROPERTY_HINT_ARRAY_TYPE, "ASAbilityPhase"), "set_phases", "get_phases");
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "ability_duration_policy", PROPERTY_HINT_ENUM, "Instant,Duration,Infinite"), "set_duration_policy", "get_duration_policy");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "ability_duration"), "set_ability_duration", "get_ability_duration");
@@ -153,6 +169,7 @@ void ASAbility::_bind_methods() {
 
 	BIND_ENUM_CONSTANT(TRIGGER_ON_TAG_ADDED);
 	BIND_ENUM_CONSTANT(TRIGGER_ON_TAG_REMOVED);
+	BIND_ENUM_CONSTANT(TRIGGER_ON_EVENT);
 
 	ADD_GROUP("Cooldown", "cooldown_");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cooldown_duration"), "set_cooldown_duration", "get_cooldown_duration");
@@ -169,7 +186,7 @@ void ASAbility::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "requirements", PROPERTY_HINT_ARRAY_TYPE, "Dictionary"), "set_requirements", "get_requirements");
 }
 
-bool ASAbility::can_activate_ability(ASComponent *p_owner, Ref<ASAbilitySpec> p_spec) const {
+bool ASAbility::can_activate_ability(ASComponent *p_owner, const Ref<ASAbilitySpec> &p_spec) const {
 	ERR_FAIL_NULL_V(p_owner, false);
 
 	if (!p_owner->get_owned_tags()->has_all_tags(activation_required_all_tags)) {
@@ -201,7 +218,7 @@ bool ASAbility::can_activate_ability(ASComponent *p_owner, Ref<ASAbilitySpec> p_
 	}
 
 	bool script_ret = true;
-	if (GDVIRTUAL_CALL(_on_can_activate_ability, p_owner, p_spec, script_ret)) {
+	if (const_cast<ASAbility *>(this)->GDVIRTUAL_CALL(_on_can_activate_ability, p_owner, p_spec, script_ret)) {
 		if (!script_ret) {
 			return false;
 		}
@@ -210,12 +227,12 @@ bool ASAbility::can_activate_ability(ASComponent *p_owner, Ref<ASAbilitySpec> p_
 	return true;
 }
 
-void ASAbility::activate_ability(ASComponent *p_owner, Ref<ASAbilitySpec> p_spec, Object *p_target_node) {
+void ASAbility::activate_ability(ASComponent *p_owner, const Ref<ASAbilitySpec> &p_spec, Object *p_target_node) {
 	ERR_FAIL_COND(p_spec.is_null());
 	p_spec->activate(p_target_node);
 }
 
-void ASAbility::end_ability(ASComponent *p_owner, Ref<ASAbilitySpec> p_spec) {
+void ASAbility::end_ability(ASComponent *p_owner, const Ref<ASAbilitySpec> &p_spec) {
 	ERR_FAIL_COND(p_spec.is_null());
 	p_spec->deactivate();
 }
@@ -301,7 +318,7 @@ void ASAbility::set_cooldown_tags(const TypedArray<StringName> &p_tags) {
 	cooldown_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -386,7 +403,7 @@ void ASAbility::set_activation_owned_tags(const TypedArray<StringName> &p_tags) 
 	activation_owned_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -395,7 +412,7 @@ void ASAbility::set_activation_required_all_tags(const TypedArray<StringName> &p
 	activation_required_all_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -404,7 +421,7 @@ void ASAbility::set_activation_required_any_tags(const TypedArray<StringName> &p
 	activation_required_any_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -413,7 +430,7 @@ void ASAbility::set_activation_blocked_any_tags(const TypedArray<StringName> &p_
 	activation_blocked_any_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -422,7 +439,7 @@ void ASAbility::set_activation_blocked_all_tags(const TypedArray<StringName> &p_
 	activation_blocked_all_tags = p_tags;
 	if (AbilitySystem::get_singleton()) {
 		for (int i = 0; i < p_tags.size(); i++) {
-			AbilitySystem::get_singleton()->register_tag(p_tags[i], AbilitySystem::TAG_TYPE_CONDITIONAL);
+			AbilitySystem::get_singleton()->register_tag(p_tags[i], (ASTagType)AbilitySystem::TAG_TYPE_CONDITIONAL);
 		}
 	}
 }
@@ -457,7 +474,7 @@ void ASAbility::set_ability_name(const String &p_name) {
 void ASAbility::set_ability_tag(const StringName &p_tag) {
 	ability_tag = p_tag;
 	if (AbilitySystem::get_singleton()) {
-		AbilitySystem::get_singleton()->register_tag(p_tag, AbilitySystem::TAG_TYPE_NAME, get_instance_id());
+		AbilitySystem::get_singleton()->register_tag(p_tag, (ASTagType)AbilitySystem::TAG_TYPE_NAME, get_instance_id());
 	}
 
 	for (int i = 0; i < cues.size(); i++) {
@@ -539,6 +556,15 @@ void ASAbility::apply_costs(ASComponent *p_owner, Ref<ASAbilitySpec> p_spec) con
 
 void ASAbility::set_triggers(const TypedArray<Dictionary> &p_triggers) {
 	triggers = p_triggers;
+	if (AbilitySystem::get_singleton()) {
+		for (int i = 0; i < p_triggers.size(); i++) {
+			Dictionary d = p_triggers[i];
+			if (d.has("tag") && d.has("type")) {
+				AbilitySystem::TagType t = (TriggerType)(int)d["type"] == TRIGGER_ON_EVENT ? AbilitySystem::TAG_TYPE_EVENT : AbilitySystem::TAG_TYPE_CONDITIONAL;
+				AbilitySystem::get_singleton()->register_tag(d["tag"], (ASTagType)t);
+			}
+		}
+	}
 }
 
 TypedArray<Dictionary> ASAbility::get_triggers() const {
@@ -550,6 +576,44 @@ void ASAbility::add_trigger(const StringName &p_tag, TriggerType p_type) {
 	d["tag"] = p_tag;
 	d["type"] = (int)p_type;
 	triggers.append(d);
+	if (AbilitySystem::get_singleton()) {
+		AbilitySystem::TagType t = p_type == TRIGGER_ON_EVENT ? AbilitySystem::TAG_TYPE_EVENT : AbilitySystem::TAG_TYPE_CONDITIONAL;
+		AbilitySystem::get_singleton()->register_tag(p_tag, (ASTagType)t);
+	}
+}
+
+void ASAbility::set_events_on_activate(const TypedArray<StringName> &p_events) {
+	events_on_activate = p_events;
+	if (AbilitySystem::get_singleton()) {
+		for (int i = 0; i < p_events.size(); i++) {
+			AbilitySystem::get_singleton()->register_tag(p_events[i], (ASTagType)AbilitySystem::TAG_TYPE_EVENT);
+		}
+	}
+}
+
+TypedArray<StringName> ASAbility::get_events_on_activate() const {
+	return events_on_activate;
+}
+
+void ASAbility::set_events_on_end(const TypedArray<StringName> &p_events) {
+	events_on_end = p_events;
+	if (AbilitySystem::get_singleton()) {
+		for (int i = 0; i < p_events.size(); i++) {
+			AbilitySystem::get_singleton()->register_tag(p_events[i], (ASTagType)AbilitySystem::TAG_TYPE_EVENT);
+		}
+	}
+}
+
+TypedArray<StringName> ASAbility::get_events_on_end() const {
+	return events_on_end;
+}
+
+void ASAbility::set_phases(const TypedArray<ASAbility> &p_phases) {
+	phases = p_phases;
+}
+
+TypedArray<ASAbility> ASAbility::get_phases() const {
+	return phases;
 }
 
 ASAbility::ASAbility() {
@@ -557,3 +621,4 @@ ASAbility::ASAbility() {
 
 ASAbility::~ASAbility() {
 }
+} // namespace godot

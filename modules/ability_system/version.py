@@ -3,7 +3,7 @@
 major = 0
 minor = 1
 patch = 0
-status = "dev"
+status = "stable"
 doc_branch = "latest"
 
 

@@ -21,6 +21,12 @@
 				Returns the base cooldown duration defined in the ability.
 			</description>
 		</method>
+		<method name="get_current_phase_index" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the index of the currently active phase.
+			</description>
+		</method>
 		<method name="get_cooldown_remaining" qualifiers="const">
 			<return type="float" />
 			<description>
@@ -67,6 +73,26 @@
 		<method name="get_total_duration" qualifiers="const">
 			<return type="float" />
 			<description>
+			</description>
+		</method>
+		<method name="add_sub_spec">
+			<return type="void" />
+			<param index="0" name="spec" type="ASAbilitySpec" />
+			<description>
+				Adds a sub-ability spec to this parent spec's lifecycle.
+			</description>
+		</method>
+		<method name="remove_sub_spec">
+			<return type="void" />
+			<param index="0" name="spec" type="ASAbilitySpec" />
+			<description>
+				Removes a sub-ability spec.
+			</description>
+		</method>
+		<method name="get_sub_specs" qualifiers="const">
+			<return type="ASAbilitySpec[]" />
+			<description>
+				Returns the list of active sub-specs (phases or sub-abilities) managed by this spec.
 			</description>
 		</method>
 		<method name="init">

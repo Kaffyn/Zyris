@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ASEffectModifierData" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Runtime modifier data with custom magnitude support.
+	</brief_description>
+	<description>
+		ASEffectModifierData extends the basic modifier with runtime-specific features
+		including custom magnitude overrides. Used by ASEffectSpec during effect execution
+		to handle dynamic modifier values that may differ from the base definition.
+
+		Key features:
+		- Custom magnitude override capability
+		- Runtime attribute modification tracking
+		- Serialization support for state management
+		- Integration with effect stacking and scaling
+
+		Used when effects need dynamic modifier values based on context,
+		target properties, or other runtime factors.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="to_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Converts the modifier data to a Dictionary for serialization.
+			</description>
+		</method>
+		<method name="from_dict">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+				Loads modifier data from a Dictionary created by to_dict().
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="attribute" type="StringName" setter="set_attribute" getter="get_attribute" default="&quot;&quot;">
+			The name of the attribute this modifier affects.
+		</member>
+		<member name="operation" type="int" setter="set_operation" getter="get_operation" default="0">
+			The modification operation (0=Add, 1=Multiply, 2=Set, etc.).
+		</member>
+		<member name="magnitude" type="float" setter="set_magnitude" getter="get_magnitude" default="0.0">
+			The magnitude value for this modifier (may be custom).
+		</member>
+		<member name="use_custom_magnitude" type="bool" setter="set_use_custom_magnitude" getter="get_use_custom_magnitude" default="false">
+			If true, uses the custom magnitude instead of base effect value.
+		</member>
+	</members>
+	<constants>
+	</constants>
+</class>

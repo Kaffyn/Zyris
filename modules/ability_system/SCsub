@@ -17,6 +17,7 @@ sources += Glob("scene/*.cpp")
 
 if env["target"] == "editor":
     sources += Glob("editor/*.cpp")
+    sources += Glob("compat/*.cpp")
 
 # Add collected files to Godot's module environment
 module_env.add_source_files(env.modules_sources, sources)

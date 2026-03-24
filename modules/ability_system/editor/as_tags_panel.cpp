@@ -72,7 +72,15 @@ void ASTagsPanel::_add_tag() {
 
 	AbilitySystem *as = AbilitySystem::get_singleton();
 	if (as) {
-		AbilitySystem::TagType type = (tabs->get_current_tab() == 0) ? AbilitySystem::TAG_TYPE_NAME : AbilitySystem::TAG_TYPE_CONDITIONAL;
+		ASTagType type;
+		int tab = tabs->get_current_tab();
+		if (tab == 0) {
+			type = ASTagType::NAME;
+		} else if (tab == 1) {
+			type = ASTagType::CONDITIONAL;
+		} else {
+			type = ASTagType::EVENT;
+		}
 		as->register_tag(tag, type);
 		add_tag_edit->clear();
 		update_tags();
@@ -131,6 +139,8 @@ void ASTagsPanel::_tag_edited() {
 		item = name_tags_tree->get_edited();
 	} else if (cond_tags_tree && cond_tags_tree->get_edited()) {
 		item = cond_tags_tree->get_edited();
+	} else if (event_tags_tree && event_tags_tree->get_edited()) {
+		item = event_tags_tree->get_edited();
 	}
 
 	if (!item) {
@@ -181,11 +191,12 @@ void ASTagsPanel::update_tags() {
 
 	String search_text = search_edit->get_text().to_lower();
 
-	_update_tree(name_tags_tree, AbilitySystem::TAG_TYPE_NAME, search_text);
-	_update_tree(cond_tags_tree, AbilitySystem::TAG_TYPE_CONDITIONAL, search_text);
+	_update_tree(name_tags_tree, ASTagType::NAME, search_text);
+	_update_tree(cond_tags_tree, ASTagType::CONDITIONAL, search_text);
+	_update_tree(event_tags_tree, ASTagType::EVENT, search_text);
 }
 
-void ASTagsPanel::_update_tree(Tree *p_tree, AbilitySystem::TagType p_type, const String &p_search) {
+void ASTagsPanel::_update_tree(Tree *p_tree, ASTagType p_type, const String &p_search) {
 	p_tree->clear();
 	TreeItem *root = p_tree->create_item();
 
@@ -195,7 +206,7 @@ void ASTagsPanel::_update_tree(Tree *p_tree, AbilitySystem::TagType p_type, cons
 	_create_tree_items(p_tree, root, "", tags, p_type, p_search);
 }
 
-void ASTagsPanel::_create_tree_items(Tree *p_tree, TreeItem *p_parent, const String &p_prefix, const TypedArray<StringName> &p_tags, AbilitySystem::TagType p_type, const String &p_search) {
+void ASTagsPanel::_create_tree_items(Tree *p_tree, TreeItem *p_parent, const String &p_prefix, const TypedArray<StringName> &p_tags, ASTagType p_type, const String &p_search) {
 	HashSet<String> children;
 	HashSet<String> exact_tags;
 
@@ -407,6 +418,9 @@ ASTagsPanel::ASTagsPanel() {
 
 	cond_tags_tree = create_tree("Status Tags (Conditional)");
 	tabs->add_child(cond_tags_tree);
+
+	event_tags_tree = create_tree("Event Tags");
+	tabs->add_child(event_tags_tree);
 
 	if (AbilitySystem::get_singleton()) {
 		AbilitySystem::get_singleton()->connect("tags_changed", callable_mp(this, &ASTagsPanel::update_tags));

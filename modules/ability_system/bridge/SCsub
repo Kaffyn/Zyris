@@ -1,0 +1,20 @@
+# SCsub - Build configuration for AS Bridge
+
+Import("env")
+
+# Get sources
+sources = Glob("*.cpp")
+
+# Bridge is always compiled because:
+# 1. register_types.cpp unconditionally registers all bridge classes
+# 2. The compat layer always provides base class stubs (BTTask, BTAction, etc.)
+# 3. At runtime, ASBridge::initialize() detects LimboAI and only enables
+#    bridge functionality if LimboAI is actually present
+env.add_source_files(env.modules_sources, sources)
+
+# Add include path for LimboAI headers if in module mode
+if env.get("module_limboai_enabled", False):
+    env.Append(CPPPATH=["#modules/limboai"])
+    print("AS Bridge: LimboAI module detected, using real implementations.")
+else:
+    print("AS Bridge: LimboAI not detected, using compat stubs.")

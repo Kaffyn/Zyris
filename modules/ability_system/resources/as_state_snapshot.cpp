@@ -46,7 +46,9 @@
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASStateSnapshot::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_tick", "tick"), &ASStateSnapshot::set_tick);
@@ -177,4 +179,3 @@ void ASStateSnapshot::deserialize_binary(const PackedByteArray &p_data) {
 
 ASStateSnapshot::ASStateSnapshot() {}
 ASStateSnapshot::~ASStateSnapshot() {}
-} // namespace godot

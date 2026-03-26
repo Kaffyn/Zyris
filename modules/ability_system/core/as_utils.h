@@ -28,8 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef AS_UTILS_H
-#define AS_UTILS_H
+#pragma once
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include <godot_cpp/classes/node.hpp>
@@ -39,21 +38,25 @@
 #include <godot_cpp/variant/string_name.hpp>
 #include <godot_cpp/variant/variant.hpp>
 #else
+#include "core/string/string_name.h"
 #include "core/templates/hash_map.h"
 #include "core/templates/vector.h"
 #include "core/variant/dictionary.h"
-#include "core/variant/string_name.h"
 #include "scene/main/node.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 class ASComponent;
+class ASStateSnapshot;
 
 enum ASTagType {
 	NAME = 0, // Persistent identity tags
 	CONDITIONAL = 1, // Requirement/block tags
-	EVENT = 2 // Event dispatcher tags
+	EVENT = 2, // Event dispatcher tags
+	UNKNOWN = 255
 };
 
 /**
@@ -256,12 +259,17 @@ struct ASCooldownData {
  * Circular buffer for high-performance state caching.
  * Optimized for multiplayer rollback and prediction.
  */
-class ASStateCache {
+class ASStateCache : public RefCounted {
+	GDCLASS(ASStateCache, RefCounted);
+
 private:
 	Vector<ASStateCacheEntry> cache_buffer;
 	uint32_t buffer_size = 128;
 	uint32_t current_index = 0;
 	uint32_t current_tick = 0;
+
+protected:
+	static void _bind_methods();
 
 public:
 	ASStateCache();
@@ -280,7 +288,7 @@ public:
 	// Query operations
 	bool has_tick(uint32_t p_tick) const;
 	ASStateCacheEntry get_entry(uint32_t p_tick) const;
-	Vector<uint32_t> get_available_ticks() const;
+	Array get_available_ticks() const;
 
 	// Serialization
 	Array serialize() const;
@@ -328,30 +336,37 @@ struct ASComponentState {
  * ASStateUtils
  * Utility functions for state management and serialization.
  */
-namespace ASStateUtils {
-// State comparison
-bool compare_states(const ASComponentState &p_a, const ASComponentState &p_b);
-float compute_state_difference(const ASComponentState &p_a, const ASComponentState &p_b);
+class ASStateUtils : public RefCounted {
+	GDCLASS(ASStateUtils, RefCounted);
 
-// Serialization helpers
-PackedByteArray serialize_state(const ASComponentState &p_state);
-ASComponentState deserialize_state(const PackedByteArray &p_data);
+protected:
+	static void _bind_methods();
 
-// Compression utilities
-PackedByteArray compress_state(const ASComponentState &p_state);
-ASComponentState decompress_state(const PackedByteArray &p_data);
+public:
+	// State comparison
+	static bool compare_states(const Ref<ASStateSnapshot> &p_a, const Ref<ASStateSnapshot> &p_b);
+	static float compute_state_difference(const Ref<ASStateSnapshot> &p_a, const Ref<ASStateSnapshot> &p_b);
 
-// Validation
-bool validate_state(const ASComponentState &p_state);
-Array get_validation_errors(const ASComponentState &p_state);
+	// Serialization helpers
+	static PackedByteArray serialize_state(const Ref<ASStateSnapshot> &p_state);
+	static Ref<ASStateSnapshot> deserialize_state(const PackedByteArray &p_data);
 
-// Debug utilities
-void dump_state(const ASComponentState &p_state);
-String state_to_string(const ASComponentState &p_state);
-} //namespace ASStateUtils
+	// Compression utilities
+	static PackedByteArray compress_state(const Ref<ASStateSnapshot> &p_state);
+	static Ref<ASStateSnapshot> decompress_state(const PackedByteArray &p_data);
 
-} // namespace godot
+	// Validation
+	static bool validate_state(const Ref<ASStateSnapshot> &p_state);
+	static Array get_validation_errors(const Ref<ASStateSnapshot> &p_state);
 
-VARIANT_ENUM_CAST(godot::ASTagType);
+	// Debug utilities
+	static void dump_state(const Ref<ASStateSnapshot> &p_state);
+	static String state_to_string(const Ref<ASStateSnapshot> &p_state);
+};
 
-#endif // AS_UTILS_H
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
+VARIANT_ENUM_CAST(::ASTagType);
+VARIANT_ENUM_CAST(::ModifierOp);

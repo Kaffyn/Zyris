@@ -53,22 +53,16 @@
 #include "servers/audio/audio_stream.h"
 #endif
 
-// In Native mode, engine classes live in the global namespace.
 #ifdef ABILITY_SYSTEM_GDEXTENSION
-namespace godot {
-class CharacterBody2D;
-class CharacterBody3D;
-} // namespace godot
-#else
-class CharacterBody2D;
-class CharacterBody3D;
+using namespace godot;
 #endif
 
-namespace godot {
+// Forward Declarations
+class CharacterBody2D;
+class CharacterBody3D;
 class ASAttributeSet;
 class ASTagSpec;
 class ASAttribute;
-
 class ASAbility;
 class ASAbilitySpec;
 class ASEffect;
@@ -78,9 +72,6 @@ class ASPackage;
 class ASStateSnapshot;
 class ASCue;
 class ASCueSpec;
-class ASComponent;
-
-// Redundant structs removed. Using definitions from as_utils.h and as_tag_types.h.
 
 /**
  * ASComponent (ASC)
@@ -291,4 +282,3 @@ public:
 	ASComponent();
 	~ASComponent();
 };
-} // namespace godot

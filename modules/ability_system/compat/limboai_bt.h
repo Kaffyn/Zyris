@@ -28,6 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#pragma once
+
 /**
  * compat/limboai_bt.h
  * =============================================================================
@@ -70,8 +72,8 @@ using namespace godot;
 
 #else
 #include "core/object/ref_counted.h"
+#include "core/string/string_name.h"
 #include "core/templates/vector.h"
-#include "core/variant/string_name.h"
 #include "core/variant/variant.h"
 #include "scene/main/node.h"
 #endif
@@ -80,8 +82,13 @@ using namespace godot;
 class BTTask;
 class BTAction;
 class BTCondition;
-class BTInstance;
 class BehaviorTree;
+class BTInstance;
+
+// LimboAI Task Macros
+#ifndef TASK_CATEGORY
+#define TASK_CATEGORY(m_category)
+#endif
 
 /**
  * BT namespace for Behavior Tree status codes
@@ -127,6 +134,7 @@ public:
 
 	// Utility methods
 	virtual String get_task_name() const { return "BTTask"; }
+	virtual String get_category() const { return ""; }
 
 protected:
 	Node *agent = nullptr;

@@ -46,7 +46,9 @@
 #include "modules/ability_system/resources/as_effect.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 /**
  * ASContainer
@@ -114,4 +116,3 @@ public:
 	ASContainer();
 	~ASContainer();
 };
-} // namespace godot

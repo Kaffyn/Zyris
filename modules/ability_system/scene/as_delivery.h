@@ -38,7 +38,10 @@
 #include "scene/main/node.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 class ASComponent;
 
 /**
@@ -117,4 +120,3 @@ public:
 	ASDelivery();
 	~ASDelivery();
 };
-} // namespace godot

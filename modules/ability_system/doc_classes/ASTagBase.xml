@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="ASTagBase" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="ASTagBase" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 		Base structure for all Ability System tag types with common functionality.
 	</brief_description>
@@ -7,7 +7,7 @@
 		ASTagBase provides the foundation for all tag types in the Ability System.
 		It contains common functionality for tag validation, type checking, and utility methods.
 
-		This is the base struct that ASNameTag, ASConditionalTag, and ASEventTagTag inherit from.
+		This is the base struct that ASNameTag, ASConditionalTag, and ASEventTag inherit from.
 		It follows the LimboAI bb_param pattern for type-safe tag handling.
 
 		All tags must be registered in the AbilitySystem global registry to be considered valid.

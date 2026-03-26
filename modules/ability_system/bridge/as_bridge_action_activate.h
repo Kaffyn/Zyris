@@ -28,30 +28,25 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * as_bridge_action_activate.h
- * =============================================================================
- * BTAction: Activate Ability
- *
- * Activates an ASAbility by tag on the agent's ASComponent.
- * Returns SUCCESS if activation succeeds, FAILURE otherwise.
- *
- * Configuration:
- * - ability_tag: StringName of the ability to activate
- * - asc_node_path: Optional direct path to ASComponent (auto-resolved if empty)
- * =============================================================================
- */
-
-#ifndef AS_BRIDGE_ACTION_ACTIVATE_H
-#define AS_BRIDGE_ACTION_ACTIVATE_H
+#pragma once
 
 #include "as_bridge_task.h"
 
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 #if AS_BRIDGE_LIMBOAI_AVAILABLE
 
+/**
+ * BTActionAS_ActivateAbility
+ *
+ * Activates an ASAbility by tag on the agent's ASComponent.
+ * Returns SUCCESS if activation succeeds, FAILURE otherwise.
+ */
 class BTActionAS_ActivateAbility : public BTAction, protected ASBridgeTask {
 	GDCLASS(BTActionAS_ActivateAbility, BTAction)
-	TASK_CATEGORY(Ability System)
+	TASK_CATEGORY("Ability System")
 
 private:
 	StringName ability_tag;
@@ -60,7 +55,6 @@ private:
 
 protected:
 	static void _bind_methods();
-
 	virtual BT::Status _tick(double p_delta) override;
 
 public:
@@ -75,5 +69,3 @@ public:
 };
 
 #endif // AS_BRIDGE_LIMBOAI_AVAILABLE
-
-#endif // AS_BRIDGE_ACTION_ACTIVATE_H

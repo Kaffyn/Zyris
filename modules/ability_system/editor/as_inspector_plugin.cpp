@@ -28,6 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef TOOLS_ENABLED
+
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include "src/editor/as_inspector_plugin.h"
 #include "src/core/ability_system.h"
@@ -113,3 +115,5 @@ bool ASInspectorPlugin::_parse_property(Object *p_object, const Variant::Type p_
 
 	return false;
 }
+
+#endif // TOOLS_ENABLED

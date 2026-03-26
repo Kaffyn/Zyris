@@ -28,6 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef TOOLS_ENABLED
+
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include "src/editor/as_editor_plugin.h"
 #include "src/compat/as_project_settings_compat.h"
@@ -44,7 +46,9 @@
 #include "scene/gui/tab_container.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASEditorPlugin::_bind_methods() {
 }
@@ -73,4 +77,5 @@ ASEditorPlugin::ASEditorPlugin() {
 
 ASEditorPlugin::~ASEditorPlugin() {
 }
-} // namespace godot
+
+#endif // TOOLS_ENABLED

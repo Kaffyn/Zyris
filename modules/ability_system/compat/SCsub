@@ -1,3 +1,4 @@
+# ruff: noqa: F821
 # SCsub - Build configuration for Compat Layer
 
 Import("env")

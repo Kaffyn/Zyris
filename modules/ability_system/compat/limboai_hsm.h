@@ -28,6 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#pragma once
+
 /**
  * compat/limboai_hsm.h
  * =============================================================================
@@ -64,9 +66,9 @@
 using namespace godot;
 #else
 #include "core/object/ref_counted.h"
+#include "core/string/string_name.h"
 #include "core/templates/hash_map.h"
 #include "core/templates/vector.h"
-#include "core/variant/string_name.h"
 #include "core/variant/variant.h"
 #include "scene/main/node.h"
 #endif

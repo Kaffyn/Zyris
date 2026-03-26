@@ -38,7 +38,9 @@
 #include "modules/ability_system/resources/as_attribute_set.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASAttributeSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_attribute_definitions", "definitions"), &ASAttributeSet::set_attribute_definitions);
@@ -316,4 +318,3 @@ ASAttributeSet::~ASAttributeSet() {
 	attribute_definitions.clear();
 	attributes.clear();
 }
-} // namespace godot

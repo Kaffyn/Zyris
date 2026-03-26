@@ -28,32 +28,25 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * as_bridge_action_dispatch_event.h
- * =============================================================================
- * BTAction: Dispatch AS Event
- *
- * Dispatches an ASEventTag via ASComponent.dispatch_event().
- * Uses the AS Event system natively (Split Registry Pattern).
- *
- * Configuration:
- * - event_tag: StringName (must be ASTagType::EVENT)
- * - magnitude: Float value for event intensity
- * - custom_payload: Dictionary with additional data
- * - asc_node_path: Optional direct path to ASComponent
- * =============================================================================
- */
-
-#ifndef AS_BRIDGE_ACTION_DISPATCH_EVENT_H
-#define AS_BRIDGE_ACTION_DISPATCH_EVENT_H
+#pragma once
 
 #include "as_bridge_task.h"
 
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 #if AS_BRIDGE_LIMBOAI_AVAILABLE
 
+/**
+ * BTActionAS_DispatchEvent
+ *
+ * Dispatches an ASEventTag via ASComponent.dispatch_event().
+ * Uses the AS Event system natively (Split Registry Pattern).
+ */
 class BTActionAS_DispatchEvent : public BTAction, protected ASBridgeTask {
 	GDCLASS(BTActionAS_DispatchEvent, BTAction)
-	TASK_CATEGORY(Ability System)
+	TASK_CATEGORY("Ability System")
 
 private:
 	StringName event_tag;
@@ -63,7 +56,6 @@ private:
 
 protected:
 	static void _bind_methods();
-
 	virtual BT::Status _tick(double p_delta) override;
 
 public:
@@ -81,5 +73,3 @@ public:
 };
 
 #endif // AS_BRIDGE_LIMBOAI_AVAILABLE
-
-#endif // AS_BRIDGE_ACTION_DISPATCH_EVENT_H

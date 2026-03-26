@@ -28,22 +28,29 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * as_bridge_task.h
- * =============================================================================
- * Base class for all AS Bridge BT tasks.
- *
- * Provides common functionality for resolving ASComponents from agent nodes
- * and ASC node paths. All bridge tasks inherit from this base.
- * =============================================================================
- */
-
-#ifndef AS_BRIDGE_TASK_H
-#define AS_BRIDGE_TASK_H
+#pragma once
 
 #include "../compat/limboai_bt.h"
 #include "as_bridge.h"
 
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
+// LimboAI Task Macros
+#ifndef TASK_CATEGORY
+#define TASK_CATEGORY(m_category)                  \
+	virtual String get_category() const override { \
+		return m_category;                         \
+	}
+#endif
+
+/**
+ * Base class for all AS Bridge BT tasks.
+ *
+ * Provides common functionality for resolving ASComponents from agent nodes
+ * and ASC node paths. All bridge tasks inherit from this base.
+ */
 class ASBridgeTask {
 protected:
 	/**
@@ -72,5 +79,3 @@ protected:
 public:
 	virtual ~ASBridgeTask() = default;
 };
-
-#endif // AS_BRIDGE_TASK_H

@@ -41,6 +41,8 @@
 #include "src/core/as_cue_spec.h"
 #include "src/core/as_effect_spec.h"
 #include "src/core/as_tag_spec.h"
+#include "src/core/as_tag_types.h"
+#include "src/core/as_utils.h"
 #include "src/resources/as_ability.h"
 #include "src/resources/as_ability_phase.h"
 #include "src/resources/as_attribute.h"
@@ -66,7 +68,7 @@
 #include "src/bridge/as_bridge_condition_has_tag.h"
 #include "src/bridge/as_bridge_state.h"
 
-#if defined(TOOLS_ENABLED) || defined(ABILITY_SYSTEM_GDEXTENSION)
+#ifdef TOOLS_ENABLED
 #include "src/editor/as_editor_plugin.h"
 #include "src/editor/as_editor_property.h"
 #include "src/editor/as_inspector_plugin.h"
@@ -103,7 +105,7 @@
 #include "modules/ability_system/bridge/as_bridge_condition_has_tag.h"
 #include "modules/ability_system/bridge/as_bridge_state.h"
 
-#if defined(TOOLS_ENABLED) || defined(ABILITY_SYSTEM_GDEXTENSION)
+#ifdef TOOLS_ENABLED
 #include "modules/ability_system/editor/as_editor_plugin.h"
 #include "modules/ability_system/editor/as_editor_property.h"
 #include "modules/ability_system/editor/as_inspector_plugin.h"
@@ -123,6 +125,9 @@ static ASBridge *as_bridge = nullptr;
 
 void initialize_ability_system_module(ModuleInitializationLevel p_level) {
 #endif
+	// Initialize LimboAI module for every level (it handles internally)
+	initialize_limboai_module(p_level);
+
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
 		GDREGISTER_CLASS(AbilitySystem);
 		GDREGISTER_CLASS(ASTagSpec);
@@ -140,11 +145,11 @@ void initialize_ability_system_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(ASCueSpec);
 		GDREGISTER_CLASS(ASCueAnimation);
 		GDREGISTER_CLASS(ASCueAudio);
+		GDREGISTER_CLASS(ASTagUtils);
+		GDREGISTER_CLASS(ASStateCache);
+		GDREGISTER_CLASS(ASStateUtils);
 		GDREGISTER_CLASS(ASComponent);
 		GDREGISTER_CLASS(ASDelivery);
-
-		// Initialize LimboAI core module
-		initialize_limboai_module(p_level);
 
 		// Register AS Bridge classes (only functional if LimboAI present)
 		GDREGISTER_CLASS(ASBridge);
@@ -169,7 +174,7 @@ void initialize_ability_system_module(ModuleInitializationLevel p_level) {
 		// Note: Bridge auto-detects LimboAI at runtime
 	}
 
-#if defined(TOOLS_ENABLED) || defined(ABILITY_SYSTEM_GDEXTENSION)
+#ifdef TOOLS_ENABLED
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
 		GDREGISTER_CLASS(ASInspectorPlugin);
 		GDREGISTER_CLASS(ASEditorPropertySelector);
@@ -179,8 +184,6 @@ void initialize_ability_system_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(ASEditorPlugin);
 		EditorPlugins::add_by_type<ASEditorPlugin>();
 	}
-
-	initialize_limboai_module(p_level);
 #endif
 }
 
@@ -205,9 +208,10 @@ void uninitialize_ability_system_module(ModuleInitializationLevel p_level) {
 			memdelete(as_singleton);
 			as_singleton = nullptr;
 		}
-
-		uninitialize_limboai_module(p_level);
 	}
+
+	// Uninitialize LimboAI module (it handles internally)
+	uninitialize_limboai_module(p_level);
 }
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION

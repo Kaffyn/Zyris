@@ -28,33 +28,25 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * as_bridge_action_wait_event.h
- * =============================================================================
- * BTAction: Wait for AS Event
- *
- * Enters RUNNING state and waits for a specific ASEventTag to occur.
- * Uses ASComponent.has_event_occurred() to check the Events Historical buffer.
- *
- * Configuration:
- * - event_tag: StringName of event to wait for
- * - time_window: How far back to check (seconds)
- * - asc_node_path: Optional direct path to ASComponent
- *
- * Returns SUCCESS when event detected, RUNNING while waiting.
- * =============================================================================
- */
-
-#ifndef AS_BRIDGE_ACTION_WAIT_EVENT_H
-#define AS_BRIDGE_ACTION_WAIT_EVENT_H
+#pragma once
 
 #include "as_bridge_task.h"
 
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 #if AS_BRIDGE_LIMBOAI_AVAILABLE
 
+/**
+ * BTActionAS_WaitForEvent
+ *
+ * Enters RUNNING state and waits for a specific ASEventTag to occur.
+ * Uses ASComponent.has_event_occurred() to check the Events Historical buffer.
+ */
 class BTActionAS_WaitForEvent : public BTAction, protected ASBridgeTask {
 	GDCLASS(BTActionAS_WaitForEvent, BTAction)
-	TASK_CATEGORY(Ability System)
+	TASK_CATEGORY("Ability System")
 
 private:
 	StringName event_tag;
@@ -81,5 +73,3 @@ public:
 };
 
 #endif // AS_BRIDGE_LIMBOAI_AVAILABLE
-
-#endif // AS_BRIDGE_ACTION_WAIT_EVENT_H

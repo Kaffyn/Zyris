@@ -44,9 +44,13 @@
 #include "core/templates/hash_map.h"
 #include "core/templates/hash_set.h"
 #include "core/variant/typed_array.h"
+#include "modules/ability_system/core/as_utils.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 /**
  * AbilitySystem
  * The central singleton for the Ability System module.
@@ -59,9 +63,9 @@ class AbilitySystem : public Object {
 
 public:
 	enum TagType {
-		TAG_TYPE_NAME = (int)godot::ASTagType::NAME,
-		TAG_TYPE_CONDITIONAL = (int)godot::ASTagType::CONDITIONAL,
-		TAG_TYPE_EVENT = (int)godot::ASTagType::EVENT
+		TAG_TYPE_NAME = (int)ASTagType::NAME,
+		TAG_TYPE_CONDITIONAL = (int)ASTagType::CONDITIONAL,
+		TAG_TYPE_EVENT = (int)ASTagType::EVENT
 	};
 
 private:
@@ -78,7 +82,7 @@ protected:
 public:
 	static AbilitySystem *get_singleton() { return singleton; }
 
-	void register_tag(const StringName &p_tag, ASTagType p_type = godot::ASTagType::NAME, uint64_t p_owner_id = 0);
+	void register_tag(const StringName &p_tag, ASTagType p_type = NAME, uint64_t p_owner_id = 0);
 	void rename_tag(const StringName &p_old_tag, const StringName &p_new_tag);
 	bool is_tag_registered(const StringName &p_tag) const;
 	void unregister_tag(const StringName &p_tag);
@@ -92,16 +96,17 @@ public:
 	void unregister_resource_name(const String &p_name);
 	uint64_t get_resource_name_owner(const String &p_name) const;
 
+	int run_tests();
+
 	// Helper to check if a tag matches another (hierarchical)
 	static bool tag_matches(const StringName &p_tag, const StringName &p_match_against, bool p_exact = false);
 
 	AbilitySystem();
 	~AbilitySystem();
 };
-} // namespace godot
 
-VARIANT_ENUM_CAST(godot::AbilitySystem::TagType);
-
-#ifndef ABILITY_SYSTEM_GDEXTENSION
-// Add missing cast for Module build if needed.
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
 #endif
+
+VARIANT_ENUM_CAST(AbilitySystem::TagType);

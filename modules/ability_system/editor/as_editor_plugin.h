@@ -36,7 +36,12 @@
 #include "editor/plugins/editor_plugin.h"
 #endif
 
-namespace godot {
+#ifdef TOOLS_ENABLED
+
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 class ASEditorPlugin : public EditorPlugin {
 	GDCLASS(ASEditorPlugin, EditorPlugin);
 
@@ -53,4 +58,5 @@ public:
 	ASEditorPlugin();
 	~ASEditorPlugin();
 };
-} // namespace godot
+
+#endif // TOOLS_ENABLED

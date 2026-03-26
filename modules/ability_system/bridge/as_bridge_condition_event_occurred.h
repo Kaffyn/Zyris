@@ -28,31 +28,25 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * as_bridge_condition_event_occurred.h
- * =============================================================================
- * BTCondition: Event Occurred
- *
- * Checks if an ASEventTag occurred within a time window using the Events Historical
- * buffer. Returns SUCCESS if event found, FAILURE otherwise.
- *
- * Configuration:
- * - event_tag: StringName of event to check
- * - time_window: How far back to check (seconds)
- * - asc_node_path: Optional direct path to ASComponent
- * =============================================================================
- */
-
-#ifndef AS_BRIDGE_CONDITION_EVENT_OCCURRED_H
-#define AS_BRIDGE_CONDITION_EVENT_OCCURRED_H
+#pragma once
 
 #include "as_bridge_task.h"
 
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 #if AS_BRIDGE_LIMBOAI_AVAILABLE
 
+/**
+ * BTConditionAS_EventOccurred
+ *
+ * Checks if an ASEventTag occurred within a time window using the Events Historical
+ * buffer. Returns SUCCESS if event found, FAILURE otherwise.
+ */
 class BTConditionAS_EventOccurred : public BTCondition, protected ASBridgeTask {
 	GDCLASS(BTConditionAS_EventOccurred, BTCondition)
-	TASK_CATEGORY(Ability System)
+	TASK_CATEGORY("Ability System")
 
 private:
 	StringName event_tag;
@@ -61,7 +55,6 @@ private:
 
 protected:
 	static void _bind_methods();
-
 	virtual BT::Status _tick(double p_delta) override;
 
 public:
@@ -76,5 +69,3 @@ public:
 };
 
 #endif // AS_BRIDGE_LIMBOAI_AVAILABLE
-
-#endif // AS_BRIDGE_CONDITION_EVENT_OCCURRED_H

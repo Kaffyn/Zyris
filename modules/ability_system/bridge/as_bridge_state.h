@@ -28,33 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * as_bridge_state.h
- * =============================================================================
- * LimboState: AS Bridge State
- *
- * A LimboState that integrates with Ability System. Provides automatic
- * event handling and tag synchronization for HSM states.
- *
- * Features:
- * - Enters when specific tags are added (optional)
- * - Exits when specific tags are removed (optional)
- * - Dispatches events on enter/exit/update
- * - Listens to AS events and transitions automatically
- *
- * Configuration:
- * - required_tags: Array of tags that must be present to enter
- * - enter_events: Events to dispatch on _enter()
- * - exit_events: Events to dispatch on _exit()
- * - listen_events: Events that trigger transition to next state
- * =============================================================================
- */
-
-#ifndef AS_BRIDGE_STATE_H
-#define AS_BRIDGE_STATE_H
+#pragma once
 
 #include "../compat/limboai_hsm.h"
 #include "as_bridge_task.h"
+
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 #if AS_BRIDGE_LIMBOAI_AVAILABLE
 
@@ -64,6 +45,12 @@
 #include "modules/limboai/hsm/limbo_state.h"
 #endif
 
+/**
+ * ASBridgeState
+ *
+ * A LimboState that integrates with Ability System. Provides automatic
+ * event handling and tag synchronization for HSM states.
+ */
 class ASBridgeState : public LimboState {
 	GDCLASS(ASBridgeState, LimboState)
 
@@ -131,5 +118,3 @@ public:
 };
 
 #endif // AS_BRIDGE_LIMBOAI_AVAILABLE
-
-#endif // AS_BRIDGE_STATE_H

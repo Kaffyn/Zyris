@@ -36,7 +36,9 @@
 #include "modules/ability_system/core/as_tag_spec.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASTagSpec::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_tag", "tag", "exact"), &ASTagSpec::has_tag, DEFVAL(false));
@@ -109,6 +111,14 @@ bool ASTagSpec::remove_tag(const StringName &p_tag) {
 	return false;
 }
 
+bool ASTagSpec::remove_tag_fully(const StringName &p_tag) {
+	if (tags.has(p_tag)) {
+		tags.erase(p_tag);
+		return true;
+	}
+	return false;
+}
+
 void ASTagSpec::clear() {
 	tags.clear();
 }
@@ -126,4 +136,3 @@ ASTagSpec::ASTagSpec() {
 
 ASTagSpec::~ASTagSpec() {
 }
-} // namespace godot

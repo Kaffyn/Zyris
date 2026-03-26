@@ -41,7 +41,10 @@
 #include "core/variant/variant.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 class ASCue;
 class ASComponent;
 class ASEffectSpec;
@@ -124,4 +127,3 @@ public:
 	void set_extra_data(const Dictionary &p_data) { extra_data = p_data; }
 	Dictionary get_extra_data() const { return extra_data; }
 };
-} // namespace godot

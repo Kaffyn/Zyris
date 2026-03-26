@@ -41,7 +41,9 @@
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASEffectSpec::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("init", "effect", "level"), &ASEffectSpec::init, DEFVAL(1.0f));
@@ -74,7 +76,7 @@ void ASEffectSpec::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "target_node"), "set_target_node", "get_target_node");
 }
 
-void ASEffectSpec::init(godot::Ref<godot::ASEffect> p_effect, float p_lvl) {
+void ASEffectSpec::init(Ref<ASEffect> p_effect, float p_lvl) {
 	effect = p_effect;
 	level = p_lvl;
 	if (effect.is_valid()) {
@@ -151,5 +153,3 @@ ASEffectSpec::ASEffectSpec() {
 
 ASEffectSpec::~ASEffectSpec() {
 }
-
-} // namespace godot

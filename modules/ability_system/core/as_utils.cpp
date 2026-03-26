@@ -46,7 +46,9 @@
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 // === ASEffectModifier Implementation ===
 
@@ -59,12 +61,15 @@ Dictionary ASEffectModifier::to_dict() const {
 }
 
 void ASEffectModifier::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("attribute"))
+	if (p_dict.has("attribute")) {
 		attribute = p_dict["attribute"];
-	if (p_dict.has("operation"))
+	}
+	if (p_dict.has("operation")) {
 		operation = (ModifierOp)(int)p_dict["operation"];
-	if (p_dict.has("magnitude"))
+	}
+	if (p_dict.has("magnitude")) {
 		magnitude = p_dict["magnitude"];
+	}
 }
 
 // === ASEffectModifierData Implementation ===
@@ -79,14 +84,18 @@ Dictionary ASEffectModifierData::to_dict() const {
 }
 
 void ASEffectModifierData::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("attribute"))
+	if (p_dict.has("attribute")) {
 		attribute = p_dict["attribute"];
-	if (p_dict.has("operation"))
+	}
+	if (p_dict.has("operation")) {
 		operation = (ModifierOp)(int)p_dict["operation"];
-	if (p_dict.has("magnitude"))
+	}
+	if (p_dict.has("magnitude")) {
 		magnitude = p_dict["magnitude"];
-	if (p_dict.has("use_custom_magnitude"))
+	}
+	if (p_dict.has("use_custom_magnitude")) {
 		use_custom_magnitude = p_dict["use_custom_magnitude"];
+	}
 }
 
 // === ASEffectRequirement Implementation ===
@@ -99,10 +108,12 @@ Dictionary ASEffectRequirement::to_dict() const {
 }
 
 void ASEffectRequirement::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("attribute"))
+	if (p_dict.has("attribute")) {
 		attribute = p_dict["attribute"];
-	if (p_dict.has("amount"))
+	}
+	if (p_dict.has("amount")) {
 		amount = p_dict["amount"];
+	}
 }
 
 // === ASAttributeValue Implementation ===
@@ -115,10 +126,12 @@ Dictionary ASAttributeValue::to_dict() const {
 }
 
 void ASAttributeValue::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("base_value"))
+	if (p_dict.has("base_value")) {
 		base_value = p_dict["base_value"];
-	if (p_dict.has("current_value"))
+	}
+	if (p_dict.has("current_value")) {
 		current_value = p_dict["current_value"];
+	}
 }
 
 // === ASEventTagData Implementation ===
@@ -136,20 +149,27 @@ Dictionary ASEventTagData::to_dict() const {
 }
 
 void ASEventTagData::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("event_tag"))
+	if (p_dict.has("event_tag")) {
 		event_tag = p_dict["event_tag"];
-	if (p_dict.has("instigator_id"))
+	}
+	if (p_dict.has("instigator_id")) {
 		instigator_id = ObjectID((uint64_t)p_dict["instigator_id"]);
-	if (p_dict.has("target_id"))
+	}
+	if (p_dict.has("target_id")) {
 		target_id = ObjectID((uint64_t)p_dict["target_id"]);
-	if (p_dict.has("magnitude"))
+	}
+	if (p_dict.has("magnitude")) {
 		magnitude = p_dict["magnitude"];
-	if (p_dict.has("custom_payload"))
+	}
+	if (p_dict.has("custom_payload")) {
 		custom_payload = p_dict["custom_payload"];
-	if (p_dict.has("timestamp"))
+	}
+	if (p_dict.has("timestamp")) {
 		timestamp = p_dict["timestamp"];
-	if (p_dict.has("tick_id"))
+	}
+	if (p_dict.has("tick_id")) {
 		tick_id = p_dict["tick_id"];
+	}
 }
 
 // === ASEventTagHistoricalEntry Implementation ===
@@ -162,10 +182,12 @@ Dictionary ASEventTagHistoricalEntry::to_dict() const {
 }
 
 void ASEventTagHistoricalEntry::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("data"))
+	if (p_dict.has("data")) {
 		data.from_dict(p_dict["data"]);
-	if (p_dict.has("tick"))
+	}
+	if (p_dict.has("tick")) {
 		tick = p_dict["tick"];
+	}
 }
 
 // === ASNameTagHistoricalEntry Implementation ===
@@ -181,16 +203,21 @@ Dictionary ASNameTagHistoricalEntry::to_dict() const {
 }
 
 void ASNameTagHistoricalEntry::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("tag_name"))
+	if (p_dict.has("tag_name")) {
 		tag_name = p_dict["tag_name"];
-	if (p_dict.has("target_id"))
+	}
+	if (p_dict.has("target_id")) {
 		target_id = ObjectID((uint64_t)p_dict["target_id"]);
-	if (p_dict.has("timestamp"))
+	}
+	if (p_dict.has("timestamp")) {
 		timestamp = p_dict["timestamp"];
-	if (p_dict.has("tick_id"))
+	}
+	if (p_dict.has("tick_id")) {
 		tick_id = p_dict["tick_id"];
-	if (p_dict.has("added"))
+	}
+	if (p_dict.has("added")) {
 		added = p_dict["added"];
+	}
 }
 
 // === ASConditionalTagHistoricalEntry Implementation ===
@@ -206,16 +233,21 @@ Dictionary ASConditionalTagHistoricalEntry::to_dict() const {
 }
 
 void ASConditionalTagHistoricalEntry::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("tag_name"))
+	if (p_dict.has("tag_name")) {
 		tag_name = p_dict["tag_name"];
-	if (p_dict.has("target_id"))
+	}
+	if (p_dict.has("target_id")) {
 		target_id = ObjectID((uint64_t)p_dict["target_id"]);
-	if (p_dict.has("timestamp"))
+	}
+	if (p_dict.has("timestamp")) {
 		timestamp = p_dict["timestamp"];
-	if (p_dict.has("tick_id"))
+	}
+	if (p_dict.has("tick_id")) {
 		tick_id = p_dict["tick_id"];
-	if (p_dict.has("added"))
+	}
+	if (p_dict.has("added")) {
 		added = p_dict["added"];
+	}
 }
 
 // === ASStateCacheEntry Implementation ===
@@ -301,16 +333,21 @@ Dictionary ASEffectState::to_dict() const {
 }
 
 void ASEffectState::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("tag"))
+	if (p_dict.has("tag")) {
 		tag = p_dict["tag"];
-	if (p_dict.has("remaining_time"))
+	}
+	if (p_dict.has("remaining_time")) {
 		remaining_time = p_dict["remaining_time"];
-	if (p_dict.has("period_timer"))
+	}
+	if (p_dict.has("period_timer")) {
 		period_timer = p_dict["period_timer"];
-	if (p_dict.has("stack_count"))
+	}
+	if (p_dict.has("stack_count")) {
 		stack_count = p_dict["stack_count"];
-	if (p_dict.has("level"))
+	}
+	if (p_dict.has("level")) {
 		level = p_dict["level"];
+	}
 }
 
 // === ASCooldownData Implementation ===
@@ -323,10 +360,29 @@ Dictionary ASCooldownData::to_dict() const {
 }
 
 void ASCooldownData::from_dict(const Dictionary &p_dict) {
-	if (p_dict.has("remaining"))
+	if (p_dict.has("remaining")) {
 		remaining = p_dict["remaining"];
-	if (p_dict.has("tags"))
-		tags = p_dict["tags"];
+	}
+	if (p_dict.has("tags")) {
+		tags = Array(p_dict["tags"]);
+	}
+}
+
+void ASStateCache::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("capture_state", "component"), &ASStateCache::capture_state);
+	ClassDB::bind_method(D_METHOD("restore_state", "component", "tick"), &ASStateCache::restore_state);
+	ClassDB::bind_method(D_METHOD("clear"), &ASStateCache::clear);
+	ClassDB::bind_method(D_METHOD("set_buffer_size", "size"), &ASStateCache::set_buffer_size);
+	ClassDB::bind_method(D_METHOD("get_buffer_size"), &ASStateCache::get_buffer_size);
+	ClassDB::bind_method(D_METHOD("get_current_tick"), &ASStateCache::get_current_tick);
+	ClassDB::bind_method(D_METHOD("has_tick", "tick"), &ASStateCache::has_tick);
+	ClassDB::bind_method(D_METHOD("get_available_ticks"), &ASStateCache::get_available_ticks);
+	ClassDB::bind_method(D_METHOD("serialize"), &ASStateCache::serialize);
+	ClassDB::bind_method(D_METHOD("deserialize", "data"), &ASStateCache::deserialize);
+	ClassDB::bind_method(D_METHOD("dump_cache"), &ASStateCache::dump_cache);
+	ClassDB::bind_method(D_METHOD("get_used_slots"), &ASStateCache::get_used_slots);
+
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "buffer_size"), "set_buffer_size", "get_buffer_size");
 }
 
 // === ASStateCache Implementation ===
@@ -362,8 +418,9 @@ void ASStateCache::capture_state(ASComponent *p_component) {
 	TypedArray<ASAttributeSet> sets = p_component->get_attribute_sets();
 	for (int i = 0; i < sets.size(); i++) {
 		Ref<ASAttributeSet> s = sets[i];
-		if (s.is_null())
+		if (s.is_null()) {
 			continue;
+		}
 
 		TypedArray<StringName> attrs = s->get_attribute_list();
 		for (int j = 0; j < attrs.size(); j++) {
@@ -381,11 +438,13 @@ void ASStateCache::capture_state(ASComponent *p_component) {
 	// Capture effects
 	for (int i = 0; i < p_component->active_effects.size(); i++) {
 		Ref<ASEffectSpec> spec = p_component->active_effects[i];
-		if (spec.is_null())
+		if (spec.is_null()) {
 			continue;
+		}
 		Ref<ASEffect> effect = spec->get_effect();
-		if (effect.is_null())
+		if (effect.is_null()) {
 			continue;
+		}
 
 		ASEffectState effect_state;
 		effect_state.tag = effect->get_effect_tag();
@@ -451,8 +510,9 @@ void ASStateCache::clear() {
 }
 
 void ASStateCache::set_buffer_size(uint32_t p_size) {
-	if (p_size == buffer_size)
+	if (p_size == buffer_size) {
 		return;
+	}
 
 	clear();
 	buffer_size = p_size;
@@ -481,8 +541,8 @@ ASStateCacheEntry ASStateCache::get_entry(uint32_t p_tick) const {
 	return ASStateCacheEntry(); // Return empty entry if not found
 }
 
-Vector<uint32_t> ASStateCache::get_available_ticks() const {
-	Vector<uint32_t> ticks;
+Array ASStateCache::get_available_ticks() const {
+	Array ticks;
 	for (int i = 0; i < cache_buffer.size(); i++) {
 		if (cache_buffer[i].tick > 0) {
 			ticks.push_back(cache_buffer[i].tick);
@@ -601,8 +661,9 @@ Dictionary ASComponentState::to_dict() const {
 void ASComponentState::from_dict(const Dictionary &p_dict) {
 	clear();
 
-	if (p_dict.has("tick"))
+	if (p_dict.has("tick")) {
 		tick = p_dict["tick"];
+	}
 
 	// Load attributes
 	if (p_dict.has("attributes")) {
@@ -629,8 +690,9 @@ void ASComponentState::capture_from_component(ASComponent *p_component) {
 	TypedArray<ASAttributeSet> sets = p_component->get_attribute_sets();
 	for (int i = 0; i < sets.size(); i++) {
 		Ref<ASAttributeSet> s = sets[i];
-		if (s.is_null())
+		if (s.is_null()) {
 			continue;
+		}
 
 		TypedArray<StringName> attrs = s->get_attribute_list();
 		for (int j = 0; j < attrs.size(); j++) {
@@ -648,11 +710,13 @@ void ASComponentState::capture_from_component(ASComponent *p_component) {
 	// Capture effects
 	for (int i = 0; i < p_component->active_effects.size(); i++) {
 		Ref<ASEffectSpec> spec = p_component->active_effects[i];
-		if (spec.is_null())
+		if (spec.is_null()) {
 			continue;
+		}
 		Ref<ASEffect> effect = spec->get_effect();
-		if (effect.is_null())
+		if (effect.is_null()) {
 			continue;
+		}
 
 		ASEffectState effect_state;
 		effect_state.tag = effect->get_effect_tag();
@@ -722,12 +786,15 @@ void ASComponentState::apply_to_component(ASComponent *p_component) const {
 }
 
 bool ASComponentState::equals(const ASComponentState &p_other) const {
-	if (tick != p_other.tick)
+	if (tick != p_other.tick) {
 		return false;
-	if (attributes.size() != p_other.attributes.size())
+	}
+	if (attributes.size() != p_other.attributes.size()) {
 		return false;
-	if (tags.size() != p_other.tags.size())
+	}
+	if (tags.size() != p_other.tags.size()) {
 		return false;
+	}
 	// ... detailed comparison
 	return true;
 }
@@ -744,64 +811,85 @@ void ASComponentState::apply_diff(const ASComponentState &p_diff) {
 
 // === ASStateUtils Implementation ===
 
-namespace ASStateUtils {
+void ASStateUtils::_bind_methods() {
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("compare_states", "a", "b"), &ASStateUtils::compare_states);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("compute_state_difference", "a", "b"), &ASStateUtils::compute_state_difference);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("serialize_state", "state"), &ASStateUtils::serialize_state);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("deserialize_state", "data"), &ASStateUtils::deserialize_state);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("compress_state", "state"), &ASStateUtils::compress_state);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("decompress_state", "data"), &ASStateUtils::decompress_state);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("validate_state", "state"), &ASStateUtils::validate_state);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("get_validation_errors", "state"), &ASStateUtils::get_validation_errors);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("dump_state", "state"), &ASStateUtils::dump_state);
+	ClassDB::bind_static_method("ASStateUtils", D_METHOD("state_to_string", "state"), &ASStateUtils::state_to_string);
 
-bool compare_states(const ASComponentState &p_a, const ASComponentState &p_b) {
-	return p_a.equals(p_b);
+	// Bind Modifier Constants
+	ClassDB::bind_integer_constant("ASStateUtils", "ModifierOp", "ADD", (int)ModifierOp::ADD);
+	ClassDB::bind_integer_constant("ASStateUtils", "ModifierOp", "MULTIPLY", (int)ModifierOp::MULTIPLY);
+	ClassDB::bind_integer_constant("ASStateUtils", "ModifierOp", "DIVIDE", (int)ModifierOp::DIVIDE);
+	ClassDB::bind_integer_constant("ASStateUtils", "ModifierOp", "OVERRIDE", (int)ModifierOp::OVERRIDE);
 }
 
-float compute_state_difference(const ASComponentState &p_a, const ASComponentState &p_b) {
+bool ASStateUtils::compare_states(const Ref<ASStateSnapshot> &p_a, const Ref<ASStateSnapshot> &p_b) {
+	if (p_a.is_null() || p_b.is_null()) {
+		return p_a == p_b;
+	}
+	return p_a->get_tick() == p_b->get_tick() && p_a->get_attributes() == p_b->get_attributes() && p_a->get_tags() == p_b->get_tags();
+}
+
+float ASStateUtils::compute_state_difference(const Ref<ASStateSnapshot> &p_a, const Ref<ASStateSnapshot> &p_b) {
 	// Compute numerical difference between states
 	return 0.0f;
 }
 
-PackedByteArray serialize_state(const ASComponentState &p_state) {
-	// Serialize state to binary
-	return PackedByteArray();
+PackedByteArray ASStateUtils::serialize_state(const Ref<ASStateSnapshot> &p_state) {
+	if (p_state.is_null()) {
+		return PackedByteArray();
+	}
+	return p_state->serialize_binary();
 }
 
-ASComponentState deserialize_state(const PackedByteArray &p_data) {
-	// Deserialize state from binary
-	return ASComponentState();
+Ref<ASStateSnapshot> ASStateUtils::deserialize_state(const PackedByteArray &p_data) {
+	Ref<ASStateSnapshot> snapshot;
+	snapshot.instantiate();
+	snapshot->deserialize_binary(p_data);
+	return snapshot;
 }
 
-PackedByteArray compress_state(const ASComponentState &p_state) {
+PackedByteArray ASStateUtils::compress_state(const Ref<ASStateSnapshot> &p_state) {
 	// Compress state data
-	return PackedByteArray();
+	return serialize_state(p_state);
 }
 
-ASComponentState decompress_state(const PackedByteArray &p_data) {
+Ref<ASStateSnapshot> ASStateUtils::decompress_state(const PackedByteArray &p_data) {
 	// Decompress state data
-	return ASComponentState();
+	return deserialize_state(p_data);
 }
 
-bool validate_state(const ASComponentState &p_state) {
-	// Validate state integrity
+bool ASStateUtils::validate_state(const Ref<ASStateSnapshot> &p_state) {
 	return p_state.is_valid();
 }
 
-Array get_validation_errors(const ASComponentState &p_state) {
-	// Return array of validation errors
+Array ASStateUtils::get_validation_errors(const Ref<ASStateSnapshot> &p_state) {
 	return Array();
 }
 
-void dump_state(const ASComponentState &p_state) {
+void ASStateUtils::dump_state(const Ref<ASStateSnapshot> &p_state) {
+	if (p_state.is_null()) {
+		UtilityFunctions::print("ASComponentState: <null>");
+		return;
+	}
 	UtilityFunctions::print("=== ASComponentState Dump ===");
-	UtilityFunctions::print("Tick: ", (int)p_state.tick);
-	UtilityFunctions::print("Attributes: ", (int)p_state.attributes.size());
-	UtilityFunctions::print("Tags: ", (int)p_state.tags.size());
-	UtilityFunctions::print("Active Effects: ", (int)p_state.active_effects.size());
-	UtilityFunctions::print("Cooldowns: ", (int)p_state.cooldowns.size());
-	UtilityFunctions::print("Name History: ", (int)p_state.name_history.size());
-	UtilityFunctions::print("Conditional History: ", (int)p_state.conditional_history.size());
-	UtilityFunctions::print("Event History: ", (int)p_state.event_history.size());
+	UtilityFunctions::print("Tick: ", (int)p_state->get_tick());
+	UtilityFunctions::print("Attributes: ", (int)p_state->get_attributes().size());
+	UtilityFunctions::print("Tags: ", (int)p_state->get_tags().size());
+	UtilityFunctions::print("Active Effects: ", (int)p_state->get_active_effects().size());
 	UtilityFunctions::print("=== End State Dump ===");
 }
 
-String state_to_string(const ASComponentState &p_state) {
-	return String("ASComponentState(tick=") + String::num(p_state.tick) + ")";
+String ASStateUtils::state_to_string(const Ref<ASStateSnapshot> &p_state) {
+	if (p_state.is_null()) {
+		return "ASComponentState(<null>)";
+	}
+	return String("ASComponentState(tick=") + String::num(p_state->get_tick()) + ")";
 }
-
-} // namespace ASStateUtils
-
-} // namespace godot

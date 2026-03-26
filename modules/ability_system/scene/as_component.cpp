@@ -86,11 +86,13 @@
 #include "scene/3d/sprite_3d.h"
 #include "scene/animation/animation_player.h"
 #include "scene/audio/audio_stream_player.h"
-#scene / main / multiplayer_api.h "
+#include "scene/main/multiplayer_api.h"
 #include "servers/audio/audio_stream.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 ASComponent *ASComponent::get_from_node(Node *p_node) {
 	if (!p_node) {
@@ -282,15 +284,15 @@ void ASComponent::_notification(int p_what) {
 		case NOTIFICATION_READY: {
 			// Validate parent is CharacterBody2D or CharacterBody3D
 			Node *parent = get_parent();
-			if (!parent || (!Object::cast_to<CharacterBody2D>(parent) && !Object::cast_to<CharacterBody3D>(parent))) {
+			if (!parent || (!Object::cast_to<godot::CharacterBody2D>(parent) && !Object::cast_to<godot::CharacterBody3D>(parent))) {
 				ERR_PRINT("ASComponent FATAL: Can only be child of CharacterBody2D or CharacterBody3D. Disabling component.");
 				set_physics_process(false);
 				return;
 			}
 
 			// Cache the validated CharacterBody parent
-			character_body_2d = Object::cast_to<CharacterBody2D>(parent);
-			character_body_3d = Object::cast_to<CharacterBody3D>(parent);
+			character_body_2d = (::CharacterBody2D *)Object::cast_to<godot::CharacterBody2D>(parent);
+			character_body_3d = (::CharacterBody3D *)Object::cast_to<godot::CharacterBody3D>(parent);
 
 			if (container.is_valid()) {
 				apply_container(container);
@@ -437,6 +439,8 @@ void ASComponent::add_tag(const StringName &p_tag) {
 				case ASTagType::EVENT:
 					// Events are handled by dispatch_event, not add_tag
 					break;
+				case ASTagType::UNKNOWN:
+					break;
 			}
 
 			_handle_ability_triggers(p_tag, ASAbility::TRIGGER_ON_TAG_ADDED);
@@ -489,6 +493,8 @@ void ASComponent::remove_tag(const StringName &p_tag) {
 				}
 				case ASTagType::EVENT:
 					// Events are handled by dispatch_event, not remove_tag
+					break;
+				case ASTagType::UNKNOWN:
 					break;
 			}
 
@@ -2310,4 +2316,3 @@ ASComponent::~ASComponent() {
 	active_effects.clear();
 	unlocked_abilities.clear();
 }
-} // namespace godot

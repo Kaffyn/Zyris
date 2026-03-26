@@ -28,30 +28,25 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * as_bridge_condition_can_activate.h
- * =============================================================================
- * BTCondition: Can Activate Ability
- *
- * Checks if an ability can be activated (requirements met, cooldown ready, etc.)
- * without actually activating it.
- *
- * Configuration:
- * - ability_tag: StringName of ability to check
- * - asc_node_path: Optional direct path to ASComponent
- * =============================================================================
- */
-
-#ifndef AS_BRIDGE_CONDITION_CAN_ACTIVATE_H
-#define AS_BRIDGE_CONDITION_CAN_ACTIVATE_H
+#pragma once
 
 #include "as_bridge_task.h"
 
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 #if AS_BRIDGE_LIMBOAI_AVAILABLE
 
+/**
+ * BTConditionAS_CanActivate
+ *
+ * Checks if an ability can be activated (requirements met, cooldown ready, etc.)
+ * without actually activating it.
+ */
 class BTConditionAS_CanActivate : public BTCondition, protected ASBridgeTask {
 	GDCLASS(BTConditionAS_CanActivate, BTCondition)
-	TASK_CATEGORY(Ability System)
+	TASK_CATEGORY("Ability System")
 
 private:
 	StringName ability_tag;
@@ -59,7 +54,6 @@ private:
 
 protected:
 	static void _bind_methods();
-
 	virtual BT::Status _tick(double p_delta) override;
 
 public:
@@ -71,5 +65,3 @@ public:
 };
 
 #endif // AS_BRIDGE_LIMBOAI_AVAILABLE
-
-#endif // AS_BRIDGE_CONDITION_CAN_ACTIVATE_H

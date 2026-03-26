@@ -5,7 +5,7 @@
 	</brief_description>
 	<description>
 		A [LimboState] that integrates with Ability System. Provides automatic event dispatching on state transitions and event listening for automatic transitions.
-		Can require specific tags to be present before entering, and dispatches AS events on [method _enter], [method _exit], and [method _update].
+		Can require specific tags to be present before entering, and dispatches AS events on [code]_enter[/code], [code]_exit[/code], and [code]_update[/code].
 	</description>
 	<tutorials>
 	</tutorials>
@@ -84,7 +84,7 @@
 			<return type="void" />
 			<param index="0" name="events" type="Array" />
 			<description>
-				Sets the events to listen for. When detected, triggers [method event_finished].
+				Sets the events to listen for. When detected, triggers [code]event_finished[/code].
 			</description>
 		</method>
 		<method name="set_required_tags">
@@ -105,7 +105,7 @@
 			<return type="void" />
 			<param index="0" name="events" type="Array" />
 			<description>
-				Sets the events to dispatch during each [method _update] call.
+				Sets the events to dispatch during each [code]_update[/code] call.
 			</description>
 		</method>
 	</methods>

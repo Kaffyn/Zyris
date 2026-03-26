@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="ASComponentState" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="ASComponentState" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 		Complete state representation of an ASComponent for serialization.
 	</brief_description>
@@ -89,7 +89,7 @@
 		<member name="tick" type="int" setter="set_tick" getter="get_tick" default="0">
 			The tick number this state represents.
 		</member>
-		<member name="attributes" type="HashMap" setter="set_attributes" getter="get_attributes" default="{}">
+		<member name="attributes" type="Dictionary" setter="set_attributes" getter="get_attributes" default="{}">
 			Complete map of attribute names to their current values.
 		</member>
 		<member name="tags" type="PackedStringArray" setter="set_tags" getter="get_tags" default="[]">
@@ -98,7 +98,7 @@
 		<member name="active_effects" type="Array" setter="set_active_effects" getter="get_active_effects" default="[]">
 			Array of ASEffectState objects representing all active effects.
 		</member>
-		<member name="cooldowns" type="HashMap" setter="set_cooldowns" getter="get_cooldowns" default="{}">
+		<member name="cooldowns" type="Dictionary" setter="set_cooldowns" getter="get_cooldowns" default="{}">
 			Map of cooldown names to ASCooldownData objects.
 		</member>
 		<member name="name_history" type="Array" setter="set_name_history" getter="get_name_history" default="[]">

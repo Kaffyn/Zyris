@@ -28,23 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * AS Tag Type Definitions
- * =============================================================================
- * AS Tag Type Definitions
- *
- * Defines the three fundamental tag types in Ability System:
- * - ASNameTag: Persistent identity tags (State.Stunned, Class.Warrior)
- * - ASConditionalTag: Requirement/block tags (Can.Parried, Immune.Fire)
- * - ASEventTag: Event dispatcher tags (Event.Damage, Event.Ability.Activated)
- *
- * Based on BUSINESS_RULES.md section 2.2 - Tag Types and their purposes.
- * Inspired by LimboAI's bb_param pattern for type-safe tag handling.
- * =============================================================================
- */
-
-#ifndef AS_TAG_TYPES_H
-#define AS_TAG_TYPES_H
+#pragma once
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include "src/core/as_utils.h"
@@ -60,7 +44,9 @@
 #include "modules/ability_system/core/as_utils.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 class AbilitySystem;
 class ASComponent;
@@ -80,9 +66,9 @@ struct ASTagBase {
 	bool is_valid() const;
 
 	// Type checking
-	bool is_name_tag() const { return tag_type == ASTagType::NAME; }
-	bool is_conditional_tag() const { return tag_type == ASTagType::CONDITIONAL; }
-	bool is_event_tag() const { return tag_type == ASTagType::EVENT; }
+	bool is_name_tag() const { return tag_type == NAME; }
+	bool is_conditional_tag() const { return tag_type == CONDITIONAL; }
+	bool is_event_tag() const { return tag_type == EVENT; }
 };
 
 /**
@@ -90,7 +76,7 @@ struct ASTagBase {
  */
 struct ASNameTag : public ASTagBase {
 	// Constructor
-	ASNameTag(const StringName &p_name) : ASTagBase(p_name, ASTagType::NAME) {}
+	ASNameTag(const StringName &p_name) : ASTagBase(p_name, NAME) {}
 
 	// Convenience factory methods
 	static ASNameTag create(const StringName &p_name) { return ASNameTag(p_name); }
@@ -115,7 +101,7 @@ struct ASNameTag : public ASTagBase {
  */
 struct ASConditionalTag : public ASTagBase {
 	// Constructor
-	ASConditionalTag(const StringName &p_name) : ASTagBase(p_name, ASTagType::CONDITIONAL) {}
+	ASConditionalTag(const StringName &p_name) : ASTagBase(p_name, CONDITIONAL) {}
 
 	// Convenience factory methods
 	static ASConditionalTag create(const StringName &p_name) { return ASConditionalTag(p_name); }
@@ -141,7 +127,7 @@ struct ASConditionalTag : public ASTagBase {
  */
 struct ASEventTag : public ASTagBase {
 	// Constructor
-	ASEventTag(const StringName &p_name) : ASTagBase(p_name, ASTagType::EVENT) {}
+	ASEventTag(const StringName &p_name) : ASTagBase(p_name, EVENT) {}
 
 	// Convenience factory methods
 	static ASEventTag create(const StringName &p_name) { return ASEventTag(p_name); }
@@ -177,71 +163,74 @@ struct ASEventTag : public ASTagBase {
 };
 
 /**
- * Tag type utilities and validation
+ * ASTagUtils - Tag type utilities and validation
  */
-namespace ASTagUtils {
-// Type validation
-bool validate_tag_type(const StringName &p_tag, ASTagType p_expected_type);
+class ASTagUtils : public RefCounted {
+	GDCLASS(ASTagUtils, RefCounted);
 
-// Type detection from tag name convention
-ASTagType detect_tag_type(const StringName &p_tag);
+protected:
+	static void _bind_methods();
 
-// Factory that creates appropriate tag type based on naming convention
-ASTagBase create_tag(const StringName &p_tag);
+public:
+	// Type validation
+	static bool validate_tag_type(const StringName &p_tag, ASTagType p_expected_type);
 
-/**
- * ASNameTag Historical Query API
- */
-namespace NameHistory {
-bool was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-bool was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-bool had_tag(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-Array get_recent_additions(Node *p_target, float p_lookback_sec = 1.0f);
-Array get_recent_removals(Node *p_target, float p_lookback_sec = 1.0f);
-Array get_recent_changes(Node *p_target, float p_lookback_sec = 1.0f);
-int count_additions(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-int count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-} //namespace NameHistory
+	// Type detection from tag name convention
+	static ASTagType detect_tag_type(const StringName &p_tag);
 
-/**
- * ASConditionalTag Historical Query API
- */
-namespace ConditionalHistory {
-bool was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-bool was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-bool had_tag(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-Array get_recent_additions(Node *p_target, float p_lookback_sec = 1.0f);
-Array get_recent_removals(Node *p_target, float p_lookback_sec = 1.0f);
-Array get_recent_changes(Node *p_target, float p_lookback_sec = 1.0f);
-int count_additions(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-int count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-} //namespace ConditionalHistory
+	// Factory that creates appropriate tag type based on naming convention
+	// Note: Returns a temporary object, not a Ref
+	static ASTagBase create_tag(const StringName &p_tag);
 
-/**
- * ASEventTag Historical Query API
- */
-namespace EventHistory {
-bool did_occur(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-Array get_recent_events(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-Array get_all_recent_events(Node *p_target, float p_lookback_sec = 1.0f);
-int count_occurrences(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-Dictionary get_last_event_data(const StringName &p_tag, Node *p_target);
-float get_last_magnitude(const StringName &p_tag, Node *p_target);
-Node *get_last_instigator(const StringName &p_tag, Node *p_target);
-} //namespace EventHistory
+	// Common tag validation patterns
+	static bool is_state_tag(const StringName &p_tag);
+	static bool is_class_tag(const StringName &p_tag);
+	static bool is_team_tag(const StringName &p_tag);
+	static bool is_event_tag(const StringName &p_tag);
+	static bool is_immune_tag(const StringName &p_tag);
+	static bool is_can_tag(const StringName &p_tag);
 
-/**
- * Unified Historical Query API
- */
-namespace UnifiedHistory {
-bool was_tag_present(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-Array get_tag_history(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
-Array get_all_changes(Node *p_target, float p_lookback_sec = 1.0f);
-void dump_history(Node *p_target, float p_lookback_sec = 5.0f);
-int get_total_history_size(Node *p_target);
-} //namespace UnifiedHistory
-} //namespace ASTagUtils
+	/**
+	 * ASNameTag Historical Query API
+	 */
+	static bool name_was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static bool name_was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static bool name_had_tag(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static Array name_get_recent_additions(Node *p_target, float p_lookback_sec = 1.0f);
+	static Array name_get_recent_removals(Node *p_target, float p_lookback_sec = 1.0f);
+	static Array name_get_recent_changes(Node *p_target, float p_lookback_sec = 1.0f);
+	static int name_count_additions(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static int name_count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
 
-} // namespace godot
+	/**
+	 * ASConditionalTag Historical Query API
+	 */
+	static bool cond_was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static bool cond_was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static bool cond_had_tag(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static Array cond_get_recent_additions(Node *p_target, float p_lookback_sec = 1.0f);
+	static Array cond_get_recent_removals(Node *p_target, float p_lookback_sec = 1.0f);
+	static Array cond_get_recent_changes(Node *p_target, float p_lookback_sec = 1.0f);
+	static int cond_count_additions(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static int cond_count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
 
-#endif // AS_TAG_TYPES_H
+	/**
+	 * ASEventTag Historical Query API
+	 */
+	static bool event_did_occur(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static Array event_get_recent_events(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static Array event_get_all_recent_events(Node *p_target, float p_lookback_sec = 1.0f);
+	static int event_count_occurrences(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static Dictionary event_get_last_data(const StringName &p_tag, Node *p_target);
+	static float event_get_last_magnitude(const StringName &p_tag, Node *p_target);
+	static Node *event_get_last_instigator(const StringName &p_tag, Node *p_target);
+
+	/**
+	 * Unified Historical Query API
+	 */
+	static bool history_was_tag_present(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static Array history_get_tag_history(const StringName &p_tag, Node *p_target, float p_lookback_sec = 1.0f);
+	static Array history_get_all_changes(Node *p_target, float p_lookback_sec = 1.0f);
+	static void history_dump(Node *p_target, float p_lookback_sec = 5.0f);
+	static int history_get_total_size(Node *p_target);
+};

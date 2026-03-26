@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="ASTagUtils" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="ASTagUtils" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 		Utility functions for tag type validation, creation, and historical queries.
 	</brief_description>
@@ -42,7 +42,7 @@
 			<param index="0" name="tag" type="StringName" />
 			<description>
 				Creates appropriate tag instance based on naming convention.
-				Returns ASNameTag, ASConditionalTag, or ASEventTagTag as appropriate.
+				Returns ASNameTag, ASConditionalTag, or ASEventTag as appropriate.
 			</description>
 		</method>
 		<method name="is_state_tag" qualifiers="static">
@@ -91,5 +91,14 @@
 	<members>
 	</members>
 	<constants>
+		<constant name="NAME" value="0" enum="ASTagType">
+			A standard identity tag for classes, states, or teams (e.g., State.Stunned).
+		</constant>
+		<constant name="CONDITIONAL" value="1" enum="ASTagType">
+			A dynamic conditional tag with duration and magnitude support (e.g., Can.Attack).
+		</constant>
+		<constant name="EVENT" value="2" enum="ASTagType">
+			A high-frequency ephemeral tag with payload support (e.g., Event.Damage).
+		</constant>
 	</constants>
 </class>

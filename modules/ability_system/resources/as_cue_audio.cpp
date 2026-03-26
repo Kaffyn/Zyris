@@ -46,7 +46,9 @@
 #include "servers/audio/audio_stream.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASCueAudio::set_audio_stream(const Ref<AudioStream> &p_stream) {
 	audio_stream = p_stream;
@@ -84,4 +86,3 @@ ASCueAudio::ASCueAudio() {
 
 ASCueAudio::~ASCueAudio() {
 }
-} // namespace godot

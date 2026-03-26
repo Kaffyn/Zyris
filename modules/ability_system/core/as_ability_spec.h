@@ -49,7 +49,10 @@
 #include "core/variant/variant.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 class ASComponent;
 class ASEffectSpec;
 
@@ -129,4 +132,3 @@ public:
 	ASAbilitySpec();
 	~ASAbilitySpec();
 };
-} // namespace godot

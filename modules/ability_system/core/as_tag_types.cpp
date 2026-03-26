@@ -33,7 +33,10 @@
 #include "src/core/ability_system.h"
 #include "src/core/as_utils.h"
 #include "src/scene/as_component.h"
+#include <godot_cpp/classes/time.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #else
+#include "core/os/os.h"
 #include "modules/ability_system/core/ability_system.h"
 #include "modules/ability_system/core/as_tag_types.h"
 #include "modules/ability_system/core/as_utils.h"
@@ -41,13 +44,8 @@
 #endif
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
-#include "src/scene/as_component.h"
-#include <godot_cpp/classes/time.hpp>
-#include <godot_cpp/variant/utility_functions.hpp>
 using namespace godot;
 #endif
-
-namespace godot {
 
 bool ASTagBase::is_valid() const {
 	AbilitySystem *as = AbilitySystem::get_singleton();
@@ -67,9 +65,63 @@ bool ASEventTag::occurred_recently(Node *p_target, float p_lookback_sec) const {
 	return false;
 }
 
-namespace ASTagUtils {
+void ASTagUtils::_bind_methods() {
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("validate_tag_type", "tag", "expected_type"), &ASTagUtils::validate_tag_type);
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("detect_tag_type", "tag"), &ASTagUtils::detect_tag_type);
+	// Note: create_tag returns ASTagBase (struct), so it cannot be easily bound to ClassDB without wrapping.
+	// We skip binding create_tag for now as it's mostly internal.
 
-bool validate_tag_type(const StringName &p_tag, ASTagType p_expected_type) {
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("is_state_tag", "tag"), &ASTagUtils::is_state_tag);
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("is_class_tag", "tag"), &ASTagUtils::is_class_tag);
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("is_team_tag", "tag"), &ASTagUtils::is_team_tag);
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("is_event_tag", "tag"), &ASTagUtils::is_event_tag);
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("is_immune_tag", "tag"), &ASTagUtils::is_immune_tag);
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("is_can_tag", "tag"), &ASTagUtils::is_can_tag);
+
+	// Name History
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("name_was_tag_added", "tag", "target", "lookback_sec"), &ASTagUtils::name_was_tag_added, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("name_was_tag_removed", "tag", "target", "lookback_sec"), &ASTagUtils::name_was_tag_removed, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("name_had_tag", "tag", "target", "lookback_sec"), &ASTagUtils::name_had_tag, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("name_get_recent_additions", "target", "lookback_sec"), &ASTagUtils::name_get_recent_additions, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("name_get_recent_removals", "target", "lookback_sec"), &ASTagUtils::name_get_recent_removals, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("name_get_recent_changes", "target", "lookback_sec"), &ASTagUtils::name_get_recent_changes, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("name_count_additions", "tag", "target", "lookback_sec"), &ASTagUtils::name_count_additions, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("name_count_removals", "tag", "target", "lookback_sec"), &ASTagUtils::name_count_removals, DEFVAL(1.0f));
+
+	// Conditional History
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("cond_was_tag_added", "tag", "target", "lookback_sec"), &ASTagUtils::cond_was_tag_added, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("cond_was_tag_removed", "tag", "target", "lookback_sec"), &ASTagUtils::cond_was_tag_removed, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("cond_had_tag", "tag", "target", "lookback_sec"), &ASTagUtils::cond_had_tag, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("cond_get_recent_additions", "target", "lookback_sec"), &ASTagUtils::cond_get_recent_additions, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("cond_get_recent_removals", "target", "lookback_sec"), &ASTagUtils::cond_get_recent_removals, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("cond_get_recent_changes", "target", "lookback_sec"), &ASTagUtils::cond_get_recent_changes, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("cond_count_additions", "tag", "target", "lookback_sec"), &ASTagUtils::cond_count_additions, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("cond_count_removals", "tag", "target", "lookback_sec"), &ASTagUtils::cond_count_removals, DEFVAL(1.0f));
+
+	// Event History
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("event_did_occur", "tag", "target", "lookback_sec"), &ASTagUtils::event_did_occur, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("event_get_recent_events", "tag", "target", "lookback_sec"), &ASTagUtils::event_get_recent_events, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("event_get_all_recent_events", "target", "lookback_sec"), &ASTagUtils::event_get_all_recent_events, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("event_count_occurrences", "tag", "target", "lookback_sec"), &ASTagUtils::event_count_occurrences, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("event_get_last_data", "tag", "target"), &ASTagUtils::event_get_last_data);
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("event_get_last_magnitude", "tag", "target"), &ASTagUtils::event_get_last_magnitude);
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("event_get_last_instigator", "tag", "target"), &ASTagUtils::event_get_last_instigator);
+
+	// Unified History
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("history_was_tag_present", "tag", "target", "lookback_sec"), &ASTagUtils::history_was_tag_present, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("history_get_tag_history", "tag", "target", "lookback_sec"), &ASTagUtils::history_get_tag_history, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("history_get_all_changes", "target", "lookback_sec"), &ASTagUtils::history_get_all_changes, DEFVAL(1.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("history_dump", "target", "lookback_sec"), &ASTagUtils::history_dump, DEFVAL(5.0f));
+	ClassDB::bind_static_method("ASTagUtils", D_METHOD("history_get_total_size", "target"), &ASTagUtils::history_get_total_size);
+
+	// Bind Tag Type Constants
+	ClassDB::bind_integer_constant("ASTagUtils", "ASTagType", "NAME", (int)ASTagType::NAME);
+	ClassDB::bind_integer_constant("ASTagUtils", "ASTagType", "CONDITIONAL", (int)ASTagType::CONDITIONAL);
+	ClassDB::bind_integer_constant("ASTagUtils", "ASTagType", "EVENT", (int)ASTagType::EVENT);
+	ClassDB::bind_integer_constant("ASTagUtils", "ASTagType", "UNKNOWN", (int)ASTagType::UNKNOWN);
+}
+
+bool ASTagUtils::validate_tag_type(const StringName &p_tag, ASTagType p_expected_type) {
 	AbilitySystem *as = AbilitySystem::get_singleton();
 	if (!as) {
 		return false;
@@ -80,15 +132,11 @@ bool validate_tag_type(const StringName &p_tag, ASTagType p_expected_type) {
 		return false;
 	}
 
-	// Check If Tag Type Matches Expected Type
-	// Note: This Depends on AbilitySystem API Having Tag Type Information
-	// For Now, We'll Use Naming Convention Validation
-
 	ASTagType detected_type = detect_tag_type(p_tag);
 	return detected_type == p_expected_type;
 }
 
-ASTagType detect_tag_type(const StringName &p_tag) {
+ASTagType ASTagUtils::detect_tag_type(const StringName &p_tag) {
 	String tag_str = p_tag;
 
 	// Event Tags Always Start With "Event."
@@ -102,23 +150,22 @@ ASTagType detect_tag_type(const StringName &p_tag) {
 			tag_str.begins_with("State.Grounded") ||
 			tag_str.begins_with("State.Flying") ||
 			tag_str.begins_with("State.Stealthed")) {
-		return ASTagType::CONDITIONAL;
+		return CONDITIONAL;
 	}
 
 	// Default to NAME for All Other Tags (State.*, Class.*, Team.*, etc.)
-	// This Matches BUSINESS_RULES.md Where Most Tags Are Persistent Identity
-	return ASTagType::NAME;
+	return NAME;
 }
 
-ASTagBase create_tag(const StringName &p_tag) {
+ASTagBase ASTagUtils::create_tag(const StringName &p_tag) {
 	ASTagType type = detect_tag_type(p_tag);
 
 	switch (type) {
-		case ASTagType::NAME:
+		case NAME:
 			return ASNameTag::create(p_tag);
-		case ASTagType::CONDITIONAL:
+		case CONDITIONAL:
 			return ASConditionalTag::create(p_tag);
-		case ASTagType::EVENT:
+		case EVENT:
 			return ASEventTag::create(p_tag);
 		default:
 			return ASNameTag::create(p_tag); // Fallback
@@ -126,27 +173,27 @@ ASTagBase create_tag(const StringName &p_tag) {
 }
 
 // Common Tag Validation Patterns
-bool is_state_tag(const StringName &p_tag) {
+bool ASTagUtils::is_state_tag(const StringName &p_tag) {
 	return String(p_tag).begins_with("State.");
 }
 
-bool is_class_tag(const StringName &p_tag) {
+bool ASTagUtils::is_class_tag(const StringName &p_tag) {
 	return String(p_tag).begins_with("Class.");
 }
 
-bool is_team_tag(const StringName &p_tag) {
+bool ASTagUtils::is_team_tag(const StringName &p_tag) {
 	return String(p_tag).begins_with("Team.");
 }
 
-bool is_event_tag(const StringName &p_tag) {
+bool ASTagUtils::is_event_tag(const StringName &p_tag) {
 	return String(p_tag).begins_with("Event.");
 }
 
-bool is_immune_tag(const StringName &p_tag) {
+bool ASTagUtils::is_immune_tag(const StringName &p_tag) {
 	return String(p_tag).begins_with("Immune.");
 }
 
-bool is_can_tag(const StringName &p_tag) {
+bool ASTagUtils::is_can_tag(const StringName &p_tag) {
 	return String(p_tag).begins_with("Can.");
 }
 
@@ -161,15 +208,15 @@ static double _get_current_time() {
 #endif
 }
 
-namespace NameHistory {
-
-bool was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+bool ASTagUtils::name_was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return false;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return false;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_name_history.size() - 1; i >= 0; i--) {
@@ -186,13 +233,15 @@ bool was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec
 	return false;
 }
 
-bool was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+bool ASTagUtils::name_was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return false;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return false;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_name_history.size() - 1; i >= 0; i--) {
@@ -209,18 +258,20 @@ bool was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_s
 	return false;
 }
 
-bool had_tag(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	return was_tag_added(p_tag, p_target, p_lookback_sec);
+bool ASTagUtils::name_had_tag(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	return name_was_tag_added(p_tag, p_target, p_lookback_sec);
 }
 
-Array get_recent_additions(Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::name_get_recent_additions(Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_name_history.size() - 1; i >= 0; i--) {
@@ -241,14 +292,16 @@ Array get_recent_additions(Node *p_target, float p_lookback_sec) {
 	return result;
 }
 
-Array get_recent_removals(Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::name_get_recent_removals(Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_name_history.size() - 1; i >= 0; i--) {
@@ -269,14 +322,16 @@ Array get_recent_removals(Node *p_target, float p_lookback_sec) {
 	return result;
 }
 
-Array get_recent_changes(Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::name_get_recent_changes(Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_name_history.size() - 1; i >= 0; i--) {
@@ -296,13 +351,15 @@ Array get_recent_changes(Node *p_target, float p_lookback_sec) {
 	return result;
 }
 
-int count_additions(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+int ASTagUtils::name_count_additions(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return 0;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return 0;
+	}
 
 	int count = 0;
 	double current_time = _get_current_time();
@@ -320,13 +377,15 @@ int count_additions(const StringName &p_tag, Node *p_target, float p_lookback_se
 	return count;
 }
 
-int count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+int ASTagUtils::name_count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return 0;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return 0;
+	}
 
 	int count = 0;
 	double current_time = _get_current_time();
@@ -344,17 +403,15 @@ int count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec
 	return count;
 }
 
-} // namespace NameHistory
-
-namespace ConditionalHistory {
-
-bool was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+bool ASTagUtils::cond_was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return false;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return false;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_cond_history.size() - 1; i >= 0; i--) {
@@ -371,13 +428,15 @@ bool was_tag_added(const StringName &p_tag, Node *p_target, float p_lookback_sec
 	return false;
 }
 
-bool was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+bool ASTagUtils::cond_was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return false;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return false;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_cond_history.size() - 1; i >= 0; i--) {
@@ -394,18 +453,20 @@ bool was_tag_removed(const StringName &p_tag, Node *p_target, float p_lookback_s
 	return false;
 }
 
-bool had_tag(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	return was_tag_added(p_tag, p_target, p_lookback_sec);
+bool ASTagUtils::cond_had_tag(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	return cond_was_tag_added(p_tag, p_target, p_lookback_sec);
 }
 
-Array get_recent_additions(Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::cond_get_recent_additions(Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_cond_history.size() - 1; i >= 0; i--) {
@@ -426,14 +487,16 @@ Array get_recent_additions(Node *p_target, float p_lookback_sec) {
 	return result;
 }
 
-Array get_recent_removals(Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::cond_get_recent_removals(Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_cond_history.size() - 1; i >= 0; i--) {
@@ -454,14 +517,16 @@ Array get_recent_removals(Node *p_target, float p_lookback_sec) {
 	return result;
 }
 
-Array get_recent_changes(Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::cond_get_recent_changes(Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_cond_history.size() - 1; i >= 0; i--) {
@@ -481,13 +546,15 @@ Array get_recent_changes(Node *p_target, float p_lookback_sec) {
 	return result;
 }
 
-int count_additions(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+int ASTagUtils::cond_count_additions(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return 0;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return 0;
+	}
 
 	int count = 0;
 	double current_time = _get_current_time();
@@ -505,13 +572,15 @@ int count_additions(const StringName &p_tag, Node *p_target, float p_lookback_se
 	return count;
 }
 
-int count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+int ASTagUtils::cond_count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return 0;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return 0;
+	}
 
 	int count = 0;
 	double current_time = _get_current_time();
@@ -529,29 +598,29 @@ int count_removals(const StringName &p_tag, Node *p_target, float p_lookback_sec
 	return count;
 }
 
-} // namespace ConditionalHistory
-
-namespace EventHistory {
-
-bool did_occur(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+bool ASTagUtils::event_did_occur(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return false;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return false;
+	}
 
 	return asc->has_event_occurred(p_tag, p_lookback_sec);
 }
 
-Array get_recent_events(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::event_get_recent_events(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_event_history.size() - 1; i >= 0; i--) {
@@ -576,14 +645,16 @@ Array get_recent_events(const StringName &p_tag, Node *p_target, float p_lookbac
 	return result;
 }
 
-Array get_all_recent_events(Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::event_get_all_recent_events(Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 	for (int i = asc->_event_history.size() - 1; i >= 0; i--) {
@@ -606,13 +677,15 @@ Array get_all_recent_events(Node *p_target, float p_lookback_sec) {
 	return result;
 }
 
-int count_occurrences(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+int ASTagUtils::event_count_occurrences(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return 0;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return 0;
+	}
 
 	int count = 0;
 	double current_time = _get_current_time();
@@ -630,14 +703,16 @@ int count_occurrences(const StringName &p_tag, Node *p_target, float p_lookback_
 	return count;
 }
 
-Dictionary get_last_event_data(const StringName &p_tag, Node *p_target) {
+Dictionary ASTagUtils::event_get_last_data(const StringName &p_tag, Node *p_target) {
 	Dictionary result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	for (int i = asc->_event_history.size() - 1; i >= 0; i--) {
 		const ASEventTagHistoricalEntry &entry = asc->_event_history[i];
@@ -650,13 +725,15 @@ Dictionary get_last_event_data(const StringName &p_tag, Node *p_target) {
 	return result;
 }
 
-float get_last_magnitude(const StringName &p_tag, Node *p_target) {
-	if (!p_target)
+float ASTagUtils::event_get_last_magnitude(const StringName &p_tag, Node *p_target) {
+	if (!p_target) {
 		return 0.0f;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return 0.0f;
+	}
 
 	for (int i = asc->_event_history.size() - 1; i >= 0; i--) {
 		const ASEventTagHistoricalEntry &entry = asc->_event_history[i];
@@ -668,13 +745,15 @@ float get_last_magnitude(const StringName &p_tag, Node *p_target) {
 	return 0.0f;
 }
 
-Node *get_last_instigator(const StringName &p_tag, Node *p_target) {
-	if (!p_target)
+Node *ASTagUtils::event_get_last_instigator(const StringName &p_tag, Node *p_target) {
+	if (!p_target) {
 		return nullptr;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return nullptr;
+	}
 
 	for (int i = asc->_event_history.size() - 1; i >= 0; i--) {
 		const ASEventTagHistoricalEntry &entry = asc->_event_history[i];
@@ -686,48 +765,46 @@ Node *get_last_instigator(const StringName &p_tag, Node *p_target) {
 	return nullptr;
 }
 
-} // namespace EventHistory
-
-namespace UnifiedHistory {
-
-bool was_tag_present(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+bool ASTagUtils::history_was_tag_present(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
 	ASTagType type = ASTagUtils::detect_tag_type(p_tag);
 
 	switch (type) {
-		case ASTagType::NAME:
-			return NameHistory::had_tag(p_tag, p_target, p_lookback_sec);
-		case ASTagType::CONDITIONAL:
-			return ConditionalHistory::had_tag(p_tag, p_target, p_lookback_sec);
-		case ASTagType::EVENT:
-			return EventHistory::did_occur(p_tag, p_target, p_lookback_sec);
+		case NAME:
+			return name_had_tag(p_tag, p_target, p_lookback_sec);
+		case CONDITIONAL:
+			return cond_had_tag(p_tag, p_target, p_lookback_sec);
+		case EVENT:
+			return event_did_occur(p_tag, p_target, p_lookback_sec);
 		default:
 			return false;
 	}
 }
 
-Array get_tag_history(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::history_get_tag_history(const StringName &p_tag, Node *p_target, float p_lookback_sec) {
 	ASTagType type = ASTagUtils::detect_tag_type(p_tag);
 
 	switch (type) {
-		case ASTagType::NAME:
-			return NameHistory::get_recent_changes(p_target, p_lookback_sec);
-		case ASTagType::CONDITIONAL:
-			return ConditionalHistory::get_recent_changes(p_target, p_lookback_sec);
-		case ASTagType::EVENT:
-			return EventHistory::get_recent_events(p_tag, p_target, p_lookback_sec);
+		case NAME:
+			return name_get_recent_changes(p_target, p_lookback_sec);
+		case CONDITIONAL:
+			return cond_get_recent_changes(p_target, p_lookback_sec);
+		case EVENT:
+			return event_get_recent_events(p_tag, p_target, p_lookback_sec);
 		default:
 			return Array();
 	}
 }
 
-Array get_all_changes(Node *p_target, float p_lookback_sec) {
+Array ASTagUtils::history_get_all_changes(Node *p_target, float p_lookback_sec) {
 	Array result;
-	if (!p_target)
+	if (!p_target) {
 		return result;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return result;
+	}
 
 	double current_time = _get_current_time();
 
@@ -765,7 +842,7 @@ Array get_all_changes(Node *p_target, float p_lookback_sec) {
 		result.push_back(change_dict);
 	}
 
-	// Add ASEventTag Occurrences
+	// Add ASEventTag Changes
 	for (int i = asc->_event_history.size() - 1; i >= 0; i--) {
 		const ASEventTagHistoricalEntry &entry = asc->_event_history[i];
 
@@ -776,21 +853,22 @@ Array get_all_changes(Node *p_target, float p_lookback_sec) {
 		Dictionary change_dict;
 		change_dict["type"] = "EVENT";
 		change_dict["tag"] = entry.data.event_tag;
-		change_dict["magnitude"] = entry.data.magnitude;
 		change_dict["custom_payload"] = entry.data.custom_payload;
 		change_dict["timestamp"] = entry.data.timestamp;
 		change_dict["tick_id"] = entry.data.tick_id;
+		change_dict["magnitude"] = entry.data.magnitude;
 		result.push_back(change_dict);
 	}
 
 	return result;
 }
 
-void dump_history(Node *p_target, float p_lookback_sec) {
-	if (!p_target)
+void ASTagUtils::history_dump(Node *p_target, float p_lookback_sec) {
+	if (!p_target) {
 		return;
+	}
 
-	Array changes = get_all_changes(p_target, p_lookback_sec);
+	Array changes = history_get_all_changes(p_target, p_lookback_sec);
 
 	UtilityFunctions::print("=== AS Tag History Dump for ", p_target->get_name(), " (last ", String::num(p_lookback_sec), "s) ===");
 
@@ -812,19 +890,15 @@ void dump_history(Node *p_target, float p_lookback_sec) {
 	UtilityFunctions::print("=== End History Dump ===");
 }
 
-int get_total_history_size(Node *p_target) {
-	if (!p_target)
+int ASTagUtils::history_get_total_size(Node *p_target) {
+	if (!p_target) {
 		return 0;
+	}
 
 	ASComponent *asc = ASComponent::get_from_node(p_target);
-	if (!asc)
+	if (!asc) {
 		return 0;
+	}
 
 	return asc->_name_history.size() + asc->_cond_history.size() + asc->_event_history.size();
 }
-
-} // namespace UnifiedHistory
-
-} // namespace ASTagUtils
-
-} // namespace godot

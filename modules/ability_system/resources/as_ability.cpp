@@ -52,7 +52,9 @@
 #include "modules/ability_system/scene/as_component.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASAbility::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_ability_name", "name"), &ASAbility::set_ability_name);
@@ -486,17 +488,16 @@ void ASAbility::set_ability_tag(const StringName &p_tag) {
 }
 
 void ASAbility::add_cost(const StringName &p_attribute, float p_amount) {
-	Dictionary cost;
-	cost["attribute"] = p_attribute;
-	cost["amount"] = p_amount;
-	costs.append(cost);
+	Dictionary d;
+	d["attribute"] = p_attribute;
+	d["amount"] = p_amount;
+	costs.append(d);
 }
 
 bool ASAbility::remove_cost(const StringName &p_attribute) {
 	for (int i = 0; i < costs.size(); i++) {
-		Dictionary cost = costs[i];
-		StringName attr = cost["attribute"];
-		if (cost.has("attribute") && attr == p_attribute) {
+		Dictionary d = costs[i];
+		if (d.has("attribute") && (StringName)d["attribute"] == p_attribute) {
 			costs.remove_at(i);
 			return true;
 		}
@@ -506,10 +507,9 @@ bool ASAbility::remove_cost(const StringName &p_attribute) {
 
 float ASAbility::get_cost_amount(const StringName &p_attribute) const {
 	for (int i = 0; i < costs.size(); i++) {
-		Dictionary cost = costs[i];
-		StringName attr = cost["attribute"];
-		if (cost.has("attribute") && attr == p_attribute) {
-			return cost["amount"];
+		Dictionary d = costs[i];
+		if (d.has("attribute") && (StringName)d["attribute"] == p_attribute) {
+			return d["amount"];
 		}
 	}
 	return 0.0f;
@@ -517,17 +517,16 @@ float ASAbility::get_cost_amount(const StringName &p_attribute) const {
 
 bool ASAbility::can_afford_costs(ASComponent *p_owner, Ref<ASAbilitySpec> p_spec) const {
 	for (int i = 0; i < costs.size(); i++) {
-		Dictionary cost = costs[i];
-		if (cost.has("attribute") && cost.has("amount")) {
-			StringName attribute = cost["attribute"];
-			float amount = cost["amount"];
+		Dictionary d = costs[i];
+		if (d.has("attribute") && d.has("amount")) {
+			StringName attribute = d["attribute"];
+			float amount = d["amount"];
 
 			if (use_custom_costs) {
 				p_owner->GDVIRTUAL_CALL(_on_calculate_custom_magnitude, Variant(), -3 - i, amount);
 			}
 
 			float current_value = p_owner->get_attribute_value_by_tag(attribute);
-			// Cost is treated as a positive value to subtract
 			if (current_value < amount) {
 				return false;
 			}
@@ -538,17 +537,16 @@ bool ASAbility::can_afford_costs(ASComponent *p_owner, Ref<ASAbilitySpec> p_spec
 
 void ASAbility::apply_costs(ASComponent *p_owner, Ref<ASAbilitySpec> p_spec) const {
 	for (int i = 0; i < costs.size(); i++) {
-		Dictionary cost = costs[i];
-		if (cost.has("attribute") && cost.has("amount")) {
-			StringName attribute = cost["attribute"];
-			float amount = cost["amount"];
+		Dictionary d = costs[i];
+		if (d.has("attribute") && d.has("amount")) {
+			StringName attribute = d["attribute"];
+			float amount = d["amount"];
 
 			if (use_custom_costs) {
 				p_owner->GDVIRTUAL_CALL(_on_calculate_custom_magnitude, Variant(), -3 - i, amount);
 			}
 
 			float base_value = p_owner->get_attribute_base_value_by_tag(attribute);
-			// Subtract the cost magnitude from the base value
 			p_owner->set_attribute_base_value_by_tag(attribute, base_value - amount);
 		}
 	}
@@ -621,4 +619,3 @@ ASAbility::ASAbility() {
 
 ASAbility::~ASAbility() {
 }
-} // namespace godot

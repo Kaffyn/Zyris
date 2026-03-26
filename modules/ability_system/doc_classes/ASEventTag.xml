@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="ASEventTagTag" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="ASEventTag" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 		Event dispatcher tag for transient system notifications (Event.Damage, Event.Ability.Activated).
 	</brief_description>
 	<description>
-		ASEventTagTag represents event identifiers used with the dispatch system. These are
+		ASEventTag represents event identifiers used with the dispatch system. These are
 		transient signals that flow through the system informing about specific occurrences.
 
 		Events are instant messengers that carry context including instigator, magnitude,
@@ -15,17 +15,17 @@
 		Events are dispatched via ASComponent.dispatch_event() and can be queried
 		through the Events Historical buffer for temporal reactivity.
 
-		ASEventTagTag provides convenience methods for dispatching events and checking
+		ASEventTag provides convenience methods for dispatching events and checking
 		if they occurred recently.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
 		<method name="create" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<param index="0" name="name" type="StringName" />
 			<description>
-				Creates a new ASEventTagTag with the specified name.
+				Creates a new ASEventTag with the specified name.
 			</description>
 		</method>
 		<method name="dispatch">
@@ -48,91 +48,91 @@
 			</description>
 		</method>
 		<method name="DAMAGE_DEALT" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined DAMAGE_DEALT combat event tag.
 			</description>
 		</method>
 		<method name="DAMAGE_TAKEN" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined DAMAGE_TAKEN combat event tag.
 			</description>
 		</method>
 		<method name="DAMAGE_BLOCKED" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined DAMAGE_BLOCKED combat event tag.
 			</description>
 		</method>
 		<method name="HEAL_RECEIVED" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined HEAL_RECEIVED combat event tag.
 			</description>
 		</method>
 		<method name="ABILITY_ACTIVATED" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined ABILITY_ACTIVATED event tag.
 			</description>
 		</method>
 		<method name="ABILITY_FAILED" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined ABILITY_FAILED event tag.
 			</description>
 		</method>
 		<method name="ABILITY_COOLDOWN_END" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined ABILITY_COOLDOWN_END event tag.
 			</description>
 		</method>
 		<method name="ABILITY_INTERRUPTED" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined ABILITY_INTERRUPTED event tag.
 			</description>
 		</method>
 		<method name="STUN_BEGIN" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined STUN_BEGIN state event tag.
 			</description>
 		</method>
 		<method name="STUN_END" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined STUN_END state event tag.
 			</description>
 		</method>
 		<method name="DEATH" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined DEATH event tag.
 			</description>
 		</method>
 		<method name="RESPAWN" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined RESPAWN event tag.
 			</description>
 		</method>
 		<method name="WEAPON_HIT" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined WEAPON_HIT combat event tag.
 			</description>
 		</method>
 		<method name="WEAPON_MISS" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined WEAPON_MISS combat event tag.
 			</description>
 		</method>
 		<method name="WEAPON_CRITICAL" qualifiers="static">
-			<return type="ASEventTagTag" />
+			<return type="ASEventTag" />
 			<description>
 				Returns a predefined WEAPON_CRITICAL combat event tag.
 			</description>

@@ -42,7 +42,9 @@
 #include "modules/ability_system/resources/as_effect.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 /**
  * ASPackage
@@ -96,4 +98,3 @@ public:
 	ASPackage();
 	~ASPackage();
 };
-} // namespace godot

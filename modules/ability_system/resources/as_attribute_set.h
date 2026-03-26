@@ -44,7 +44,9 @@
 #include "modules/ability_system/resources/as_attribute.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 /**
  * ASAttributeSet
@@ -131,6 +133,9 @@ public:
 	ASAttributeSet();
 	~ASAttributeSet();
 };
-} // namespace godot
+
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 VARIANT_ENUM_CAST(ASAttributeSet::ModifierType);

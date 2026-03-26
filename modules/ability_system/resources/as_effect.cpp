@@ -44,7 +44,9 @@
 #include "modules/ability_system/resources/as_effect.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASEffect::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_effect_name", "name"), &ASEffect::set_effect_name);
@@ -152,7 +154,7 @@ void ASEffect::_bind_methods() {
 void ASEffect::add_modifier(const StringName &p_attr, ModifierOp p_op, float p_mag, bool p_custom) {
 	ASEffectModifierData md;
 	md.attribute = p_attr;
-	md.operation = (godot::ModifierOp)p_op;
+	md.operation = (::ModifierOp)p_op;
 	md.magnitude = p_mag;
 	md.use_custom_magnitude = p_custom;
 	modifiers.push_back(md);
@@ -223,7 +225,7 @@ bool ASEffect::_set(const StringName &p_name, const Variant &p_value) {
 			modifiers.write[index].attribute = p_value;
 			return true;
 		} else if (what == "operation") {
-			modifiers.write[index].operation = (godot::ModifierOp)(int)p_value;
+			modifiers.write[index].operation = (::ModifierOp)(int)p_value;
 			return true;
 		} else if (what == "magnitude") {
 			modifiers.write[index].magnitude = p_value;
@@ -467,4 +469,3 @@ ASEffect::ASEffect() {
 
 ASEffect::~ASEffect() {
 }
-} // namespace godot

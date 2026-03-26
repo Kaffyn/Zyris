@@ -47,6 +47,7 @@ TabContainer *ASProjectSettingsCompat::get_project_settings_tabs() {
 	}
 	return nullptr;
 #else
+#ifdef TOOLS_ENABLED
 	EditorInterface *editor = EditorInterface::get_singleton();
 	if (!editor) {
 		return nullptr;
@@ -75,5 +76,8 @@ TabContainer *ASProjectSettingsCompat::get_project_settings_tabs() {
 	}
 
 	return Object::cast_to<TabContainer>(tab_containers[0]);
+#else
+	return nullptr;
+#endif // TOOLS_ENABLED
 #endif
 }

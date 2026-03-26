@@ -28,47 +28,23 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-/**
- * as_bridge.h
- * =============================================================================
- * AS Bridge - Integration between Ability System and LimboAI
- *
- * This module provides seamless integration between Ability System (AS) and
- * LimboAI Behavior Trees / Hierarchical State Machines.
- *
- * When LimboAI is detected at runtime, the bridge registers custom BT tasks
- * and LimboStates that interact with ASComponent, enabling AI-driven ability
- * activation, event dispatching, and state synchronization.
- *
- * Compilation Strategy:
- * - The compat layer always provides base class stubs (BTTask, BTAction,
- *   BTCondition, LimboState) so bridge classes always compile.
- * - At runtime, ASBridge::initialize() detects LimboAI presence and only
- *   registers tasks if LimboAI is actually loaded.
- * =============================================================================
- */
+#pragma once
 
-#ifndef AS_BRIDGE_H
-#define AS_BRIDGE_H
-
-// The compat layer guarantees that LimboAI base classes (BTTask, BTAction,
-// BTCondition, LimboState, etc.) are always available — either as real
-// LimboAI classes (when the module is present) or as compat stubs.
-// Therefore, bridge classes can always compile.
 #define AS_BRIDGE_LIMBOAI_AVAILABLE 1
 
-#include "../scene/as_component.h"
-
-// Compat wrappers for LimboAI integration
 #include "../compat/limboai_task_db.h"
+#include "../scene/as_component.h"
 
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
-using namespace godot;
 #else
 #include "core/config/engine.h"
 #include "core/object/ref_counted.h"
+#endif
+
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
 #endif
 
 /**
@@ -138,5 +114,3 @@ public:
 	ASBridge();
 	~ASBridge();
 };
-
-#endif // AS_BRIDGE_H

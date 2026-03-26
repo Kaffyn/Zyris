@@ -35,7 +35,12 @@
 #include "editor/inspector/editor_inspector.h"
 #endif
 
-namespace godot {
+#ifdef TOOLS_ENABLED
+
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 /**
  * ASInspectorPlugin
  * Responsible for intercepting and customizing how Ability System properties
@@ -56,4 +61,5 @@ public:
 	virtual bool _parse_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const BitField<PropertyUsageFlags> p_usage, const bool p_wide = false) override;
 #endif
 };
-} // namespace godot
+
+#endif // TOOLS_ENABLED

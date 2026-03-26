@@ -48,7 +48,10 @@
 #include "modules/ability_system/resources/as_effect.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 class ASComponent;
 class ASAbilitySpec;
 
@@ -70,9 +73,9 @@ public:
 	};
 
 	// GDScript virtuals
-	GDVIRTUAL2(_on_activate_ability, godot::Object *, godot::Ref<godot::RefCounted>);
-	GDVIRTUAL2RC(bool, _on_can_activate_ability, godot::Object *, godot::Ref<godot::RefCounted>);
-	GDVIRTUAL2(_on_end_ability, godot::Object *, godot::Ref<godot::RefCounted>);
+	GDVIRTUAL2(_on_activate_ability, Object *, Ref<RefCounted>);
+	GDVIRTUAL2RC(bool, _on_can_activate_ability, Object *, Ref<RefCounted>);
+	GDVIRTUAL2(_on_end_ability, Object *, Ref<RefCounted>);
 
 public:
 	static void _bind_methods();
@@ -216,7 +219,10 @@ public:
 	ASAbility();
 	~ASAbility();
 };
-} // namespace godot
 
-VARIANT_ENUM_CAST(godot::ASAbility::DurationPolicy);
-VARIANT_ENUM_CAST(godot::ASAbility::TriggerType);
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
+VARIANT_ENUM_CAST(ASAbility::DurationPolicy);
+VARIANT_ENUM_CAST(ASAbility::TriggerType);

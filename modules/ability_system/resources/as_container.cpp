@@ -44,7 +44,9 @@
 #include "modules/ability_system/resources/as_effect.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASContainer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_abilities", "abilities"), &ASContainer::set_abilities);
@@ -192,4 +194,3 @@ ASContainer::ASContainer() {
 
 ASContainer::~ASContainer() {
 }
-} // namespace godot

@@ -36,7 +36,9 @@
 #include "modules/ability_system/resources/as_package.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 void ASPackage::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_effects", "effects"), &ASPackage::set_effects);
@@ -180,4 +182,3 @@ ASPackage::ASPackage() {
 
 ASPackage::~ASPackage() {
 }
-} // namespace godot

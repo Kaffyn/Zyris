@@ -38,7 +38,10 @@
 #include "servers/audio/audio_stream.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 class ASCueAudio : public ASCue {
 	GDCLASS(ASCueAudio, ASCue);
 
@@ -58,4 +61,3 @@ public:
 	ASCueAudio();
 	~ASCueAudio();
 };
-} // namespace godot

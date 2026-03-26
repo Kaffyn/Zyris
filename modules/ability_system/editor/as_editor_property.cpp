@@ -28,10 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#ifdef TOOLS_ENABLED
+
 #ifdef ABILITY_SYSTEM_GDEXTENSION
 #include "src/editor/as_editor_property.h"
 #include "src/core/ability_system.h"
 #include <godot_cpp/classes/v_box_container.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 #else
 #include "modules/ability_system/core/ability_system.h"
 #include "modules/ability_system/editor/as_editor_property.h"
@@ -258,6 +261,7 @@ ASEditorPropertyName::ASEditorPropertyName() {
 	warning_label->set_modulate(Color(1, 0.5, 0)); // Orange color
 	warning_label->hide();
 	add_child(warning_label);
+	_check_uniqueness("");
 }
 
 // ASEditorPropertyTagSelector implementation
@@ -333,3 +337,5 @@ ASEditorPropertyTagSelector::ASEditorPropertyTagSelector() {
 #endif
 	}
 }
+
+#endif // TOOLS_ENABLED

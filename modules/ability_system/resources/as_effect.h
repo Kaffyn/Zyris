@@ -44,7 +44,10 @@
 #include "modules/ability_system/resources/as_cue.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 class ASCue;
 class ASEffectSpec;
 
@@ -71,10 +74,10 @@ public:
 	};
 
 	enum ModifierOp {
-		OP_ADD = (int)godot::ModifierOp::ADD,
-		OP_MULTIPLY = (int)godot::ModifierOp::MULTIPLY,
-		OP_DIVIDE = (int)godot::ModifierOp::DIVIDE,
-		OP_OVERRIDE = (int)godot::ModifierOp::OVERRIDE
+		OP_ADD = 0,
+		OP_MULTIPLY = 1,
+		OP_DIVIDE = 2,
+		OP_OVERRIDE = 3
 	};
 
 protected:
@@ -191,9 +194,12 @@ public:
 	ASEffect();
 	~ASEffect();
 };
-} // namespace godot
 
-VARIANT_ENUM_CAST(godot::ASEffect::DurationPolicy);
-VARIANT_ENUM_CAST(godot::ASEffect::StackingPolicy);
-VARIANT_ENUM_CAST(godot::ASEffect::TargetType);
-VARIANT_ENUM_CAST(godot::ASEffect::ModifierOp);
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
+VARIANT_ENUM_CAST(ASEffect::DurationPolicy);
+VARIANT_ENUM_CAST(ASEffect::StackingPolicy);
+VARIANT_ENUM_CAST(ASEffect::TargetType);
+VARIANT_ENUM_CAST(ASEffect::ModifierOp);

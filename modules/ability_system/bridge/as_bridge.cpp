@@ -38,7 +38,6 @@
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
-using namespace godot;
 #endif
 
 // Include all bridge task headers
@@ -49,6 +48,10 @@ using namespace godot;
 #include "as_bridge_condition_event_occurred.h"
 #include "as_bridge_condition_has_tag.h"
 #include "as_bridge_state.h"
+
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
 
 ASBridge *ASBridge::singleton = nullptr;
 

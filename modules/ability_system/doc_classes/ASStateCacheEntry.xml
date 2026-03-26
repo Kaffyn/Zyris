@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="ASStateCacheEntry" inherits="struct" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="ASStateCacheEntry" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
 		Lightweight state cache entry for high-performance rollback.
 	</brief_description>
@@ -43,7 +43,7 @@
 		<member name="tick" type="int" setter="set_tick" getter="get_tick" default="0">
 			The tick number this state entry represents.
 		</member>
-		<member name="attributes" type="HashMap" setter="set_attributes" getter="get_attributes" default="{}">
+		<member name="attributes" type="Dictionary" setter="set_attributes" getter="get_attributes" default="{}">
 			Map of attribute names to their base values at this tick.
 		</member>
 		<member name="tags" type="PackedStringArray" setter="set_tags" getter="get_tags" default="[]">

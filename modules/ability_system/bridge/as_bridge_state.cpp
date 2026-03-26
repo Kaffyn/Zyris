@@ -77,12 +77,14 @@ void ASBridgeState::_setup() {
 
 void ASBridgeState::_enter() {
 	Node *agent = get_agent();
-	if (!agent)
+	if (!agent) {
 		return;
+	}
 
 	ASComponent *asc = ASBridge::resolve_asc(agent, asc_node_path);
-	if (!asc)
+	if (!asc) {
 		return;
+	}
 
 	// Dispatch enter events
 	for (int i = 0; i < enter_events.size(); i++) {
@@ -95,12 +97,14 @@ void ASBridgeState::_enter() {
 
 void ASBridgeState::_exit() {
 	Node *agent = get_agent();
-	if (!agent)
+	if (!agent) {
 		return;
+	}
 
 	ASComponent *asc = ASBridge::resolve_asc(agent, asc_node_path);
-	if (!asc)
+	if (!asc) {
 		return;
+	}
 
 	// Dispatch exit events
 	for (int i = 0; i < exit_events.size(); i++) {
@@ -113,12 +117,14 @@ void ASBridgeState::_exit() {
 
 void ASBridgeState::_update(double p_delta) {
 	Node *agent = get_agent();
-	if (!agent)
+	if (!agent) {
 		return;
+	}
 
 	ASComponent *asc = ASBridge::resolve_asc(agent, asc_node_path);
-	if (!asc)
+	if (!asc) {
 		return;
+	}
 
 	// Check if we should transition based on listened events
 	if (!transition_event.is_empty()) {
@@ -167,12 +173,14 @@ bool ASBridgeState::can_enter_state(Node *p_agent) const {
 
 void ASBridgeState::dispatch_event(const StringName &p_event) {
 	Node *agent = get_agent();
-	if (!agent)
+	if (!agent) {
 		return;
+	}
 
 	ASComponent *asc = ASBridge::resolve_asc(agent, asc_node_path);
-	if (!asc)
+	if (!asc) {
 		return;
+	}
 
 	asc->dispatch_event(p_event, agent, 1.0f, Dictionary());
 }

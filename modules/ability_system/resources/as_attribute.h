@@ -38,7 +38,10 @@
 #include "core/variant/variant.h"
 #endif
 
-namespace godot {
+#ifdef ABILITY_SYSTEM_GDEXTENSION
+using namespace godot;
+#endif
+
 class ASAttribute : public Resource {
 	GDCLASS(ASAttribute, Resource);
 
@@ -71,4 +74,3 @@ public:
 	ASAttribute();
 	~ASAttribute();
 };
-} // namespace godot

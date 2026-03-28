@@ -4,6 +4,7 @@ default_language_version:
 exclude: |
   (?x)^(
     .*thirdparty/.*|
+    .*modules/ability_system/limboai/.*|
     .*-(dll|dylib|so)_wrap\.[ch]|
     platform/android/java/editor/src/main/java/com/android/.*|
     platform/android/java/lib/src/main/java/com/google/.*
